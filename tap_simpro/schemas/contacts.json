@@ -1,0 +1,16 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "GivenName": { "type": ["null", "string"] },
+    "FamilyName": { "type": ["null", "string"] },
+    "Email": { "type": ["null", "string"] },
+    "Department": { "type": ["null", "string"] },
+    "Position": { "type": ["null", "string"] },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    }
+  }
+}
