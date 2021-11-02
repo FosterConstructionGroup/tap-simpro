@@ -12,8 +12,10 @@ baseUrl = "https://fosters.simprosuite.com/api/v1.0/companies/0"
 
 streams = {
     "customers": ["customer_sites"],
-    "schedule": ["schedule_blocks"],
+    "schedules": ["schedules_blocks"],
 }
+
+sub_streams = set([x for v in streams.values() for x in v])
 
 
 def get_endpoint(resource):

@@ -35,7 +35,7 @@
           "type": ["null", "object"],
           "additionalProperties": false,
           "properties": {
-            "ID": {
+            "PricingTier": {
               "type": ["null", "object"],
               "additionalProperties": false,
               "properties": {

@@ -2,6 +2,7 @@
   "type": ["null", "object"],
   "additionalProperties": false,
   "properties": {
+    "ID": { "type": ["string"] },
     "ScheduleID": { "type": ["string"] },
     "Hrs": { "type": ["null", "number"] },
     "StartTime": { "type": ["null", "string"] },

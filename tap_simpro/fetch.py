@@ -27,7 +27,7 @@ def handle_resource(resource, schemas, state, mdata):
     if resource == "customers":
         handle_customer_sites(rows, schemas, state, mdata)
     elif resource == "schedule":
-        handle_schedule_blocks(rows, schemas, state, mdata)
+        handle_schedules_blocks(rows, schemas, state, mdata)
 
     write_many(rows, resource, schema, mdata, extraction_time)
     return write_bookmark(state, resource, extraction_time)
@@ -39,21 +39,29 @@ def handle_customer_sites(rows, schemas, state, mdata):
     extraction_time = datetime.now(timezone.utc).astimezone()
 
     for row in rows:
-        for site_id in row["Sites"]:
-            record = {"CustomerID": row["ID"], "SiteID": site_id}
+        for site in row["Sites"]:
+            record = {
+                "ID": row["ID"] + site["ID"],
+                "CustomerID": row["ID"],
+                "SiteID": site["ID"],
+            }
             write_record(record, resource, schema, mdata, extraction_time)
 
     write_bookmark(state, resource, extraction_time)
 
 
-def handle_schedule_blocks(rows, schemas, state, mdata):
-    resource = "schedule_blocks"
+def handle_schedules_blocks(rows, schemas, state, mdata):
+    resource = "schedules_blocks"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
     for row in rows:
+        i = 0
         for block in row["Blocks"]:
-            block["ScheduleID"] = row["ID"]
+            i += 1
+            id = row["ID"]
+            block["ID"] = f"{id}_{i}"
+            block["ScheduleID"] = id
             write_record(block, resource, schema, mdata, extraction_time)
 
     write_bookmark(state, resource, extraction_time)
