@@ -3,7 +3,7 @@ import json
 import singer
 from singer import metadata
 
-from tap_simpro.utility import get_abs_path, session
+from tap_simpro.utility import get_abs_path, session, streams
 from tap_simpro.fetch import handle_resource
 
 logger = singer.get_logger()
@@ -105,10 +105,20 @@ def do_sync(config, state, catalog):
         stream_schema = stream["schema"]
         mdata = stream["metadata"]
 
+        schemas = {stream_id: stream_schema}
+
         # if stream is selected, write schema and sync
-        if stream_id in selected_stream_ids:
+        if stream_id in selected_stream_ids and stream_id in streams:
             singer.write_schema(stream_id, stream_schema, stream["key_properties"])
-            state = handle_resource(stream_id, stream_schema, state, mdata)
+
+            for substream_id in streams.get(stream_id, []):
+                substream = get_stream_from_catalog(substream_id, catalog)
+                schemas[substream_id] = substream["schema"]
+                singer.write_schema(
+                    substream_id, substream["schema"], substream["key_properties"]
+                )
+
+            state = handle_resource(stream_id, schemas, state, mdata)
             singer.write_state(state)
 
 

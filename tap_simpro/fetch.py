@@ -13,7 +13,8 @@ from tap_simpro.utility import (
 )
 
 
-def handle_resource(resource, schema, state, mdata):
+def handle_resource(resource, schemas, state, mdata):
+    schema = schemas[resource]
     bookmark = get_bookmark(state, resource, "since")
     # Current time in local timezone as "aware datetime", per https://stackoverflow.com/a/25887393/7170445
     extraction_time = datetime.now(timezone.utc).astimezone()
@@ -23,8 +24,39 @@ def handle_resource(resource, schema, state, mdata):
         for row in get_resource(resource, bookmark)
     ]
 
+    if resource == "customers":
+        handle_customer_sites(rows, schemas, state, mdata)
+    elif resource == "schedule":
+        handle_schedule_blocks(rows, schemas, state, mdata)
+
     write_many(rows, resource, schema, mdata, extraction_time)
     return write_bookmark(state, resource, extraction_time)
+
+
+def handle_customer_sites(rows, schemas, state, mdata):
+    resource = "customer_sites"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    for row in rows:
+        for site_id in row["Sites"]:
+            record = {"CustomerID": row["ID"], "SiteID": site_id}
+            write_record(record, resource, schema, mdata, extraction_time)
+
+    write_bookmark(state, resource, extraction_time)
+
+
+def handle_schedule_blocks(rows, schemas, state, mdata):
+    resource = "schedule_blocks"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    for row in rows:
+        for block in row["Blocks"]:
+            block["ScheduleID"] = row["ID"]
+            write_record(block, resource, schema, mdata, extraction_time)
+
+    write_bookmark(state, resource, extraction_time)
 
 
 def write_many(rows, resource, schema, mdata, dt):

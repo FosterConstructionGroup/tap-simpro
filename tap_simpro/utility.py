@@ -10,6 +10,11 @@ session = requests.Session()
 # constants
 baseUrl = "https://fosters.simprosuite.com/api/v1.0/companies/0"
 
+streams = {
+    "customers": ["customer_sites"],
+    "schedule": ["schedule_blocks"],
+}
+
 
 def get_endpoint(resource):
     if resource == "customers":
