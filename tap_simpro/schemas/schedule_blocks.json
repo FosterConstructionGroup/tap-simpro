@@ -1,0 +1,20 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ScheduleID": { "type": ["string"] },
+    "Hrs": { "type": ["null", "number"] },
+    "StartTime": { "type": ["null", "string"] },
+    "EndTime": { "type": ["null", "string"] },
+    "ISO8601StartTime": { "type": ["null", "string"], "format": "date-time" },
+    "ISO8601EndTime": { "type": ["null", "string"], "format": "date-time" },
+    "ScheduleRate": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Name": { "type": ["null", "string"] }
+      }
+    }
+  }
+}

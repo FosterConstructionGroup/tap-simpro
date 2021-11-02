@@ -60,24 +60,11 @@ def get_resource(resource, bookmark):
 
 
 def transform_record(record, properties):
-    for key in record:
-        if key in properties:
-            prop = properties.get(key)
-            # Blank dates aren't returned as null
-            if (
-                prop.get("format") == "date-time"
-                and record[key] == "0000-00-00 00:00:00"
-            ):
-                record[key] = None
-
-            if prop.get("format") == "date" and record[key] == "0000-00-00":
-                record[key] = None
-
-            # booleans are sometimes int {1,0}, which Singer transform handles fine
-            # but sometimes are string {"1", "0"}, which Singer always transforms to True
-            # so always explicitly parse to int first
-            if (prop.get("type")[-1]) == "boolean":
-                record[key] = bool(int(record[key]))
+    if "CustomFields" in record:
+        map = {}
+        for field in record["CustomFields"]:
+            map[field["CustomField"]["Name"]] = field["Value"]
+        record["CustomFields"] = map
 
     return record
 

@@ -1,0 +1,33 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "Position": { "type": ["null", "string"] },
+    "DateOfHire": { "type": ["null", "string"] },
+    "AccountSetup": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Username": { "type": ["string"] }
+      }
+    },
+    "DateCreated": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "Archived": { "type": ["boolean"] },
+    "CustomFields": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Foster Staff UID": { "type": ["null", "string"] }
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "Address": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "City": { "type": ["string"] },
+        "State": { "type": ["string"] }
+      }
+    },
+    "PrimaryContact": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Contact": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] }
+          }
+        }
+      }
+    },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    }
+  }
+}

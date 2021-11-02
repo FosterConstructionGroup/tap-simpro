@@ -1,0 +1,64 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "CompanyName": { "type": ["null", "string"] },
+    "Phone": { "type": ["null", "string"] },
+    "CustomerType": { "type": ["null", "string"] },
+    "Rates": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "PartTaxCode": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] },
+            "Code": { "type": ["null", "number"] },
+            "Type": { "type": ["null", "number"] },
+            "Rate": { "type": ["number"] }
+          }
+        },
+        "LabourTaxCode": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] },
+            "Code": { "type": ["null", "number"] },
+            "Type": { "type": ["null", "number"] },
+            "Rate": { "type": ["number"] }
+          }
+        },
+        "DiscountFee": { "type": ["number"] },
+        "Material": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ID": { "type": ["number"] },
+                "Name": { "type": ["null", "number"] },
+                "DefaultMarkup": { "type": ["number"] }
+              }
+            },
+            "Markup": { "type": ["number"] }
+          }
+        }
+      }
+    },
+    "Archived": { "type": ["null", "boolean"] },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "DateCreated": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "Website": { "type": ["null", "string"] },
+    "Email": { "type": ["null", "string"] }
+  }
+}

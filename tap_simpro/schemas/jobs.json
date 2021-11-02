@@ -1,0 +1,49 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Type": { "type": ["null", "string"] },
+    "Customer": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "Site": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "OrderNo": { "type": ["null", "string"] },
+    "RequestNo": { "type": ["null", "string"] },
+    "Name": { "type": ["null", "string"] },
+    "Description": { "type": ["null", "string"] },
+    "DateIssued": { "type": ["null", "string"], "format": "date" },
+    "DueDate": { "type": ["null", "string"], "format": "date" },
+    "ProjectManager": { "type": ["null", "string"] },
+    "Stage": { "type": ["null", "string"] },
+    "Status": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Name": { "type": ["null", "string"] }
+      }
+    },
+    "IsVariation": { "type": ["null", "boolean"] },
+    "DateModified": { "type": ["null", "string"], "format": "date-time" },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["number"] },
+        "Tax": { "type": ["number"] }
+      }
+    },
+    "CompletedDate": { "type": ["null", "string"], "format": "date" }
+  }
+}
