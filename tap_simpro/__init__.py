@@ -25,14 +25,14 @@ def load_schemas():
 
 def populate_metadata(schema):
     mdata = metadata.new()
-    mdata = metadata.write(mdata, (), "table-key-properties", "uuid")
+    mdata = metadata.write(mdata, (), "table-key-properties", "ID")
 
     for field_name in schema["properties"].keys():
         mdata = metadata.write(
             mdata,
             ("properties", field_name),
             "inclusion",
-            "automatic" if field_name == "uuid" else "available",
+            "automatic" if field_name == "ID" else "available",
         )
 
     return mdata
@@ -52,7 +52,7 @@ def get_catalog():
             "tap_stream_id": schema_name,
             "schema": schema,
             "metadata": metadata.to_list(mdata),
-            "key_properties": "uuid",
+            "key_properties": "ID",
         }
         streams.append(catalog_entry)
 
