@@ -4,6 +4,7 @@
   "properties": {
     "ID": { "type": ["string"] },
     "Type": { "type": ["null", "string"] },
+    "Reference": { "type": ["null", "string"] },
     "TotalHours": { "type": ["null", "number"] },
     "Staff": {
       "type": ["null", "object"],
