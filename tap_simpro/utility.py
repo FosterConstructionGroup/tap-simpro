@@ -1,19 +1,17 @@
 import os
 import requests
+import singer
+from singer import metadata
 import singer.metrics as metrics
 from datetime import datetime
 
+from tap_simpro.config import streams
 
 session = requests.Session()
 
 
 # constants
 baseUrl = "https://fosters.simprosuite.com/api/v1.0/companies/0"
-
-streams = {
-    "customers": ["customer_sites"],
-    "schedules": ["schedules_blocks"],
-}
 
 sub_streams = set([x for v in streams.values() for x in v])
 
@@ -33,24 +31,14 @@ def get_resource(resource, bookmark):
         page = 1
 
         while True:
-            resp = session.request(
-                method="get",
-                url=f"{baseUrl}/{get_endpoint(resource)}/?page_size=250&page={page}&orderby=-DateModified",
+            json = get_basic(
+                resource,
+                f"{get_endpoint(resource)}/?page_size=250&page={page}&orderby=-DateModified",
             )
-            resp.raise_for_status()
-
-            timer.tags[metrics.Tag.http_status_code] = resp.status_code
-
-            json = resp.json()
 
             for row in json:
                 id = row["ID"]
-                resp = session.request(
-                    method="get",
-                    url=f"{baseUrl}/{get_endpoint(resource)}/{id}",
-                )
-                resp.raise_for_status()
-                details = resp.json()
+                details = get_basic(resource, f"{get_endpoint(resource)}/{id}")
 
                 # note that simple string comparison sorting works here, thanks to the date formatting
                 if bookmark and details["DateModified"] < bookmark:
@@ -64,6 +52,16 @@ def get_resource(resource, bookmark):
                 break
 
         return ls
+
+
+def get_basic(resource, url):
+    with metrics.http_request_timer(resource) as timer:
+        resp = session.request(method="get", url=f"{baseUrl}/{url}")
+        resp.raise_for_status()
+
+        timer.tags[metrics.Tag.http_status_code] = resp.status_code
+
+        return resp.json()
 
 
 def transform_record(record, properties):
@@ -97,3 +95,21 @@ def try_parse_date(s, parse_format=date_format):
 
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
+
+
+def write_record(row, resource, schema, mdata, dt):
+    with singer.Transformer() as transformer:
+        rec = transformer.transform(row, schema, metadata=metadata.to_map(mdata))
+    singer.write_record(resource, rec, time_extracted=dt)
+
+
+def write_many(rows, resource, schema, mdata, dt):
+    with metrics.record_counter(resource) as counter:
+        for row in rows:
+            write_record(row, resource, schema, mdata, dt)
+            counter.increment()
+
+
+def write_bookmark(state, resource, dt):
+    singer.write_bookmark(state, resource, "since", format_date(dt))
+    return state

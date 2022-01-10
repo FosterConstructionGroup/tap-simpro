@@ -1,0 +1,11 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "JobID": { "type": ["string"] },
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "Description": { "type": ["null", "string"] },
+    "DisplayOrder": { "type": ["number"] }
+  }
+}
