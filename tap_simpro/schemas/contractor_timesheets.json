@@ -1,0 +1,15 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "ScheduleType": { "type": ["string"] },
+    "Reference": { "type": ["null", "string"] },
+    "_href": { "type": ["string"] },
+    "Date": { "type": ["string"], "format": "date" },
+    "StartTime": { "type": ["string"] },
+    "EndTime": { "type": ["string"] },
+    "TotalHrs": { "type": ["number"] },
+    "Cost": { "type": ["number"] }
+  }
+}

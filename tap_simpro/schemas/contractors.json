@@ -1,0 +1,9 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "ContactName": { "type": ["null", "string"] }
+  }
+}
