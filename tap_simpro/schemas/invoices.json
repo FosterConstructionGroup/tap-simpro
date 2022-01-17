@@ -1,0 +1,24 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Type": { "type": ["null", "string"] },
+    "Customer": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "RecurringInvoice": { "type": ["null", "boolean"] },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["null", "number"] },
+        "IncTax": { "type": ["null", "number"] }
+      }
+    }
+  }
+}

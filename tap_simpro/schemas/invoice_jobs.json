@@ -1,0 +1,16 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "InvoiceID": { "type": ["string"] },
+    "JobID": { "type": ["string"] },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["null", "number"] },
+        "IncTax": { "type": ["null", "number"] }
+      }
+    }
+  }
+}
