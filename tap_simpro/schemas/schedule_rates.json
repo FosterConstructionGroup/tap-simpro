@@ -1,0 +1,14 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "Multiplier": { "type": ["null", "number"] },
+    "IncOverhead": { "type": ["null", "boolean"] },
+    "ActivityOnly": { "type": ["null", "boolean"] },
+    "Archived": { "type": ["null", "boolean"] },
+    "HourlyAllowance": { "type": ["null", "number"] },
+    "PayRateOverride": { "type": ["null", "number"] }
+  }
+}

@@ -18,8 +18,14 @@ sem = asyncio.Semaphore(32)
 
 
 def get_endpoint(resource):
-    if resource == "customers":
+    if resource == "activities":
+        return "setup/activities"
+    elif resource == "activity_schedules":
+        return "activitySchedules"
+    elif resource == "customers":
         return "customers/companies"
+    elif resource == "schedule_rates":
+        return "setup/labor/scheduleRates"
     else:
         return resource
 

@@ -1,0 +1,27 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "TotalHours": { "type": ["null", "number"] },
+    "Staff": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "Date": { "type": ["null", "string"], "format": "date" },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "Activity": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    }
+  }
+}
