@@ -94,7 +94,7 @@ def handle_invoice_jobs(invoices, schemas, state, mdata):
             j["InvoiceID"] = invoice_id
             # rename row ID to JobID so it's clearer
             j["JobID"] = j["ID"]
-            j["ID"] = None
+            j["ID"] = str(j["InvoiceID"]) + "_" + str(j["JobID"])
 
         ls += jobs
 
