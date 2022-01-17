@@ -103,8 +103,6 @@ def get_stream_from_catalog(stream_id, catalog):
 async def do_sync(session, state, catalog):
     selected_stream_ids = get_selected_streams(catalog)
 
-    singer.write_state(state)
-
     stream_futures = []
 
     for stream in catalog["streams"]:
