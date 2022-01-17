@@ -124,7 +124,7 @@ async def handle_contractor_timesheets(session, contractors, schemas, state, mda
 
     for c in contractors:
         id = c["ID"]
-        url = f"contractors/{id}/timesheets/"
+        url = f"contractors/{id}/timesheets/?Includes=Job,Activity"
 
         futures.append(
             handle_timesheets(
@@ -146,7 +146,7 @@ async def handle_employee_timesheets(session, employees, schemas, state, mdata):
 
     for e in employees:
         id = e["ID"]
-        url = f"employees/{id}/timesheets/"
+        url = f"employees/{id}/timesheets/?Includes=Job,Activity"
 
         futures.append(
             handle_timesheets(
@@ -164,14 +164,22 @@ async def handle_timesheets(session, resource, id, url, schema, mdata, extractio
 
     for t in timesheets:
         t["ID"] = str(id) + "_" + t["Date"] + "_" + t["StartTime"]
+        schedule_type = t["ScheduleType"]
 
-        reg = re.match(
-            r"^/api/v1.0/companies/\d/jobs/(\d+)/sections/\d+/costCenters/(\d+)/schedules/(\d+)$",
-            t["_href"],
-        )
-        t["JobID"] = reg[1]
-        t["CostCenterID"] = reg[2]
-        t["ScheduleID"] = reg[3]
+        if schedule_type == "Job":
+            reg = re.match(
+                r"^/api/v1.0/companies/\d/jobs/(\d+)/sections/\d+/costCenters/(\d+)/schedules/(\d+)$",
+                t["_href"],
+            )
+            t["JobID"] = reg[1]
+            t["CostCenterID"] = reg[2]
+            t["ScheduleID"] = reg[3]
+        elif schedule_type == "Activity":
+            reg = re.match(
+                r"^/api/v1.0/companies/\d/activitySchedules/(\d+)$",
+                t["_href"],
+            )
+            t["ActivityScheduleID"] = reg[1]
 
         write_record(t, resource, schema, mdata, extraction_time)
 
