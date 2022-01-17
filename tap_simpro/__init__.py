@@ -1,9 +1,17 @@
 import os
 import json
+import asyncio
+import aiohttp
 import singer
 from singer import metadata
 
-from tap_simpro.utility import get_abs_path, session, streams, sub_streams
+from tap_simpro.utility import (
+    await_futures,
+    get_abs_path,
+    streams,
+    sub_streams,
+    format_date,
+)
 from tap_simpro.fetch import handle_resource
 
 logger = singer.get_logger()
@@ -92,13 +100,13 @@ def get_stream_from_catalog(stream_id, catalog):
     return None
 
 
-def do_sync(config, state, catalog):
-    access_token = config["access_token"]
-    session.headers.update({"Authorization": f"Bearer {access_token}"})
-
+async def do_sync(session, state, catalog):
     selected_stream_ids = get_selected_streams(catalog)
+    print(selected_stream_ids)
 
     singer.write_state(state)
+
+    stream_futures = []
 
     for stream in catalog["streams"]:
         stream_id = stream["tap_stream_id"]
@@ -112,14 +120,28 @@ def do_sync(config, state, catalog):
             singer.write_schema(stream_id, stream_schema, stream["key_properties"])
 
             for substream_id in streams.get(stream_id, []):
-                substream = get_stream_from_catalog(substream_id, catalog)
-                schemas[substream_id] = substream["schema"]
-                singer.write_schema(
-                    substream_id, substream["schema"], substream["key_properties"]
-                )
+                if substream_id in selected_stream_ids:
+                    substream = get_stream_from_catalog(substream_id, catalog)
+                    schemas[substream_id] = substream["schema"]
+                    singer.write_schema(
+                        substream_id, substream["schema"], substream["key_properties"]
+                    )
 
-            state = handle_resource(stream_id, schemas, state, mdata)
-            singer.write_state(state)
+            stream_futures.append(
+                handle_resource(session, stream_id, schemas, state, mdata)
+            )
+
+    bookmarks_dicts = await await_futures(stream_futures)
+    state = {k: format_date(v) for dict in bookmarks_dicts for k, v in dict.items()}
+    singer.write_state(state)
+
+
+async def run_async(config, state, catalog):
+    access_token = config["access_token"]
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    async with aiohttp.ClientSession(headers=headers) as session:
+        await do_sync(session, state, catalog)
 
 
 @singer.utils.handle_top_exception(logger)
@@ -130,7 +152,9 @@ def main():
         do_discover()
     else:
         catalog = args.properties if args.properties else get_catalog()
-        do_sync(args.config, args.state, catalog)
+        asyncio.get_event_loop().run_until_complete(
+            run_async(args.config, args.state, catalog)
+        )
 
 
 if __name__ == "__main__":

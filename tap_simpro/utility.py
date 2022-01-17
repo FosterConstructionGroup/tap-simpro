@@ -1,5 +1,5 @@
 import os
-import requests
+import asyncio
 import singer
 from singer import metadata
 import singer.metrics as metrics
@@ -7,13 +7,14 @@ from datetime import datetime
 
 from tap_simpro.config import streams
 
-session = requests.Session()
-
 
 # constants
 baseUrl = "https://fosters.simprosuite.com/api/v1.0/companies/0"
 
 sub_streams = set([x for v in streams.values() for x in v])
+
+# no rate limiting or concurrent request limit mentioned in docs https://developer.simprogroup.com/apidoc/
+sem = asyncio.Semaphore(32)
 
 
 def get_endpoint(resource):
@@ -23,45 +24,44 @@ def get_endpoint(resource):
         return resource
 
 
-def get_resource(resource, bookmark):
-    with metrics.http_request_timer(resource) as timer:
-        session.headers.update()
+async def get_resource(session, resource, bookmark):
+    ls = []
+    page = 1
 
-        ls = []
-        page = 1
+    while True:
+        json = await get_basic(
+            session,
+            resource,
+            f"{get_endpoint(resource)}/?page_size=250&page={page}&orderby=-DateModified",
+        )
 
-        while True:
-            json = get_basic(
-                resource,
-                f"{get_endpoint(resource)}/?page_size=250&page={page}&orderby=-DateModified",
+        for row in json:
+            id = row["ID"]
+            details = await get_basic(
+                session, resource, f"{get_endpoint(resource)}/{id}"
             )
 
-            for row in json:
-                id = row["ID"]
-                details = get_basic(resource, f"{get_endpoint(resource)}/{id}")
-
-                # note that simple string comparison sorting works here, thanks to the date formatting
-                if bookmark and details["DateModified"] < bookmark:
-                    break
-
-                ls.append(details)
-
-            if len(json) > 0:
-                page += 1
-            else:
+            # note that simple string comparison sorting works here, thanks to the date formatting
+            if bookmark and details["DateModified"] < bookmark:
                 break
 
-        return ls
+            ls.append(details)
+
+        if len(json) > 0:
+            page += 1
+        else:
+            break
+
+    return ls
 
 
-def get_basic(resource, url):
-    with metrics.http_request_timer(resource) as timer:
-        resp = session.request(method="get", url=f"{baseUrl}/{url}")
-        resp.raise_for_status()
-
-        timer.tags[metrics.Tag.http_status_code] = resp.status_code
-
-        return resp.json()
+async def get_basic(session, resource, url):
+    async with sem:
+        with metrics.http_request_timer(resource) as timer:
+            async with await session.get(f"{baseUrl}/{url}") as resp:
+                timer.tags[metrics.Tag.http_status_code] = resp.status
+                resp.raise_for_status()
+                return await resp.json()
 
 
 def transform_record(record, properties):
@@ -72,6 +72,10 @@ def transform_record(record, properties):
         record["CustomFields"] = map
 
     return record
+
+
+async def await_futures(futures):
+    return await asyncio.gather(*futures)
 
 
 date_format = "%Y-%m-%d"
@@ -108,8 +112,3 @@ def write_many(rows, resource, schema, mdata, dt):
         for row in rows:
             write_record(row, resource, schema, mdata, dt)
             counter.increment()
-
-
-def write_bookmark(state, resource, dt):
-    singer.write_bookmark(state, resource, "since", format_date(dt))
-    return state

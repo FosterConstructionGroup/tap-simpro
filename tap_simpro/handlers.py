@@ -2,12 +2,12 @@ from datetime import datetime, timezone
 from tap_simpro.utility import (
     write_record,
     write_many,
-    write_bookmark,
     get_basic,
+    await_futures,
 )
 
 
-def handle_customer_sites(rows, schemas, state, mdata):
+async def handle_customer_sites(session, rows, schemas, state, mdata):
     resource = "customer_sites"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
@@ -21,10 +21,10 @@ def handle_customer_sites(rows, schemas, state, mdata):
             }
             write_record(record, resource, schema, mdata, extraction_time)
 
-    write_bookmark(state, resource, extraction_time)
+    return {resource: extraction_time}
 
 
-def handle_schedules_blocks(rows, schemas, state, mdata):
+async def handle_schedules_blocks(session, rows, schemas, state, mdata):
     resource = "schedules_blocks"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
@@ -38,29 +38,42 @@ def handle_schedules_blocks(rows, schemas, state, mdata):
             block["ScheduleID"] = id
             write_record(block, resource, schema, mdata, extraction_time)
 
-    write_bookmark(state, resource, extraction_time)
+    return {resource: extraction_time}
 
 
-def handle_job_sections(rows, schemas, state, mdata):
+async def handle_job_sections(session, rows, schemas, state, mdata):
     resource = "job_sections"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
+    new_bookmarks = {resource: extraction_time}
+
+    sections_futures = []
+    cost_centers_futures = []
+
     for job in rows:
         id = job["ID"]
-        sections = get_basic(resource, f"jobs/{id}/sections/")
+        sections_futures.append(get_basic(session, resource, f"jobs/{id}/sections/"))
+
+    sections = [
+        section for jobs in await await_futures(sections_futures) for section in jobs
+    ]
 
         for s in sections:
             s["JobID"] = id
             write_record(s, resource, schema, mdata, extraction_time)
 
             if "job_cost_centers" in schemas:
-                handle_job_cost_centers(s, schemas, state, mdata)
+            cost_centers_futures.append(
+                handle_job_cost_centers(session, s, schemas, state, mdata)
+            )
+            new_bookmarks["job_cost_centers"] = extraction_time
 
-    write_bookmark(state, resource, extraction_time)
+    await await_futures(cost_centers_futures)
+    return new_bookmarks
 
 
-def handle_job_cost_centers(section, schemas, state, mdata):
+async def handle_job_cost_centers(session, section, schemas, state, mdata):
     resource = "job_cost_centers"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
@@ -68,18 +81,17 @@ def handle_job_cost_centers(section, schemas, state, mdata):
     job_id = section["JobID"]
     section_id = section["ID"]
 
-    cost_centers = get_basic(
-        resource, f"jobs/{job_id}/sections/{section_id}/costCenters/"
+    cost_centers = await get_basic(
+        session, resource, f"jobs/{job_id}/sections/{section_id}/costCenters/"
     )
 
     for c in cost_centers:
         c["SectionID"] = section_id
 
     write_many(cost_centers, resource, schema, mdata, extraction_time)
-    write_bookmark(state, resource, extraction_time)
 
 
-def handle_invoice_jobs(invoices, schemas, state, mdata):
+async def handle_invoice_jobs(session, invoices, schemas, state, mdata):
     resource = "invoice_jobs"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
@@ -99,7 +111,7 @@ def handle_invoice_jobs(invoices, schemas, state, mdata):
         ls += jobs
 
     write_many(ls, resource, schema, mdata, extraction_time)
-    write_bookmark(state, resource, extraction_time)
+    return {resource: extraction_time}
 
 
 handlers = {
