@@ -11,7 +11,13 @@
         "ID": { "type": ["number"] }
       }
     },
-    "RecurringInvoice": { "type": ["null", "boolean"] },
+    "RecurringInvoice": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
     "Total": {
       "type": ["null", "object"],
       "additionalProperties": false,
