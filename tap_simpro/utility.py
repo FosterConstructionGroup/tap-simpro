@@ -35,22 +35,23 @@ async def get_resource(session, resource, bookmark):
             f"{get_endpoint(resource)}/?page_size=250&page={page}&orderby=-DateModified",
         )
 
-        for row in json:
-            id = row["ID"]
-            details = await get_basic(
-                session, resource, f"{get_endpoint(resource)}/{id}"
-            )
+        if len(json) == 0:
+            break
 
+        details_futures = [
+            get_basic(session, resource, f"{get_endpoint(resource)}/{row['ID']}")
+            for row in json
+        ]
+        details_ls = await await_futures(details_futures)
+
+        for d in details_ls:
             # note that simple string comparison sorting works here, thanks to the date formatting
-            if bookmark and details["DateModified"] < bookmark:
+            if bookmark and d["DateModified"] < bookmark:
                 break
 
-            ls.append(details)
+            ls.append(d)
 
-        if len(json) > 0:
-            page += 1
-        else:
-            break
+        page += 1
 
     return ls
 
