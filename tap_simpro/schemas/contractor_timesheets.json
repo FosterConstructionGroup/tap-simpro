@@ -3,6 +3,7 @@
   "additionalProperties": false,
   "properties": {
     "ID": { "type": ["string"] },
+    "ContractorID": { "type": ["string"] },
     "JobID": { "type": ["null", "string"] },
     "CostCenterID": { "type": ["null", "string"] },
     "ScheduleID": { "type": ["null", "string"] },

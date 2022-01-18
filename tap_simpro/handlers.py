@@ -162,8 +162,11 @@ async def handle_employee_timesheets(session, employees, schemas, state, mdata):
 async def handle_timesheets(session, resource, id, url, schema, mdata, extraction_time):
     timesheets = await get_basic(session, resource, url)
 
+    id_key = "EmployeeID" if resource == "employee_timesheets" else "ContractorID"
+
     for t in timesheets:
         t["ID"] = str(id) + "_" + t["Date"] + "_" + t["StartTime"]
+        t[id_key] = id
         schedule_type = t["ScheduleType"]
 
         if schedule_type == "Job":
