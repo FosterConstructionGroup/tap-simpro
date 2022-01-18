@@ -1,0 +1,15 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "OrderID": { "type": ["string"] },
+    "JobNo": { "type": ["null", "string"] },
+    "AmountExTax": { "type": ["null", "number"] },
+    "AmountIncTax": { "type": ["null", "number"] },
+    "QUantity": { "type": ["null", "number"] },
+    "TaxCode": { "type": ["null", "string"] },
+    "TaxRate": { "type": ["null", "number"] },
+    "AccountNo": { "type": ["null", "string"] },
+    "Tracking": { "type": ["null", "string"] }
+  }
+}

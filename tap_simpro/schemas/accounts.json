@@ -1,0 +1,11 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "Number": { "type": ["null", "string"] },
+    "Type": { "type": ["null", "string"] },
+    "Archived": { "type": ["null", "boolean"] }
+  }
+}

@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-import singer.metrics as metrics
 from singer.bookmarks import get_bookmark
 from tap_simpro.utility import (
     get_resource,

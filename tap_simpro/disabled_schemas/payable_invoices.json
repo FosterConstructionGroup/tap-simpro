@@ -1,0 +1,23 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "OrderID": { "type": ["string"] },
+    "OrderNo": { "type": ["string"] },
+    "Reference": { "type": ["string"] },
+    "Email": { "type": ["string"] },
+    "PaymentTerm": { "type": ["null", "number"] },
+    "PaymentTermType": { "type": ["null", "string"] },
+    "Currency": { "type": ["null", "string"] },
+    "ExchangeRate": { "type": ["null", "number"] },
+    "Category": { "type": ["null", "string"] },
+    "Exported": { "type": ["null", "boolean"] },
+    "DateIssued": { "type": ["null", "string"], "format": "date" },
+    "DateDue": { "type": ["null", "string"], "format": "date" },
+    "CreditInvoiceID": { "type": ["null", "string"] },
+    "CreditInvoiceNo": { "type": ["null", "string"] },
+    "AmountExTax": { "type": ["null", "number"] },
+    "AmountIncTax": { "type": ["null", "number"] },
+    "Type": { "type": ["null", "string"] }
+  }
+}

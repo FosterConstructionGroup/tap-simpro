@@ -1,11 +1,12 @@
 import os
+import hashlib
 import asyncio
 import singer
 from singer import metadata
 import singer.metrics as metrics
 from datetime import datetime
 
-from tap_simpro.config import streams
+from tap_simpro.config import streams, has_details
 
 
 # constants
@@ -18,16 +19,20 @@ sem = asyncio.Semaphore(32)
 
 
 def get_endpoint(resource):
-    if resource == "activities":
+    if resource == "accounts":
+        return "setup/accounts/chartOfAccounts"
+    elif resource == "activities":
         return "setup/activities"
-    elif resource == "activity_schedules":
-        return "activitySchedules"
+    elif resource == "cost_centers":
+        return "setup/accounts/costCenters"
     elif resource == "customers":
         return "customers/companies"
+    elif resource == "payable_invoices":
+        return "accounts/payable/invoices"
     elif resource == "schedule_rates":
         return "setup/labor/scheduleRates"
     else:
-        return resource
+        return to_camel_case(resource)
 
 
 async def get_resource(session, resource, bookmark):
@@ -41,23 +46,27 @@ async def get_resource(session, resource, bookmark):
             f"{get_endpoint(resource)}/?page_size=250&page={page}&orderby=-DateModified",
         )
 
+        fetch_details = has_details.get(resource, True)
+
         if len(json) == 0:
             break
-
-        details_futures = [
-            get_basic(session, resource, f"{get_endpoint(resource)}/{row['ID']}")
-            for row in json
-        ]
-        details_ls = await await_futures(details_futures)
-
-        for d in details_ls:
-            # note that simple string comparison sorting works here, thanks to the date formatting
-            if bookmark and d["DateModified"] < bookmark:
-                break
-
-            ls.append(d)
-
         page += 1
+
+        if fetch_details:
+            details_futures = [
+                get_basic(session, resource, f"{get_endpoint(resource)}/{row['ID']}")
+                for row in json
+            ]
+            details_ls = await await_futures(details_futures)
+
+            for d in details_ls:
+                # note that simple string comparison sorting works here, thanks to the date formatting
+                if bookmark and d["DateModified"] < bookmark:
+                    break
+
+                ls.append(d)
+        else:
+            ls += json
 
     return ls
 
@@ -104,6 +113,10 @@ def try_parse_date(s, parse_format=date_format):
         return None
 
 
+def hash(s):
+    return hashlib.md5(s.encode("utf-8")).hexdigest()
+
+
 def get_abs_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
 
@@ -119,3 +132,9 @@ def write_many(rows, resource, schema, mdata, dt):
         for row in rows:
             write_record(row, resource, schema, mdata, dt)
             counter.increment()
+
+
+# per https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase#19053800
+def to_camel_case(snake_str):
+    components = snake_str.split("_")
+    return components[0] + "".join(x.title() for x in components[1:])

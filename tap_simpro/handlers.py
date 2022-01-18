@@ -1,11 +1,6 @@
 from datetime import datetime, timezone
 import re
-from tap_simpro.utility import (
-    write_record,
-    write_many,
-    get_basic,
-    await_futures,
-)
+from tap_simpro.utility import write_record, write_many, get_basic, await_futures, hash
 
 
 async def handle_customer_sites(session, rows, schemas, state, mdata):
@@ -193,6 +188,31 @@ async def handle_timesheets(session, resource, id, url, schema, mdata, extractio
         write_record(t, resource, schema, mdata, extraction_time)
 
 
+async def handle_payable_invoices_cost_centers(
+    session, invoices, schemas, state, mdata
+):
+    resource = "payable_invoices_cost_centers"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    for invoice in invoices:
+        for cc in invoice["CostCenters"]:
+            cc["ID"] = hash(
+                "_".join(
+                    [
+                        invoice["OrderID"],
+                        invoice["JobNo"],
+                        invoice["AccountNo"],
+                        invoice["Name"],
+                    ]
+                )
+            )
+            cc["OrderID"] = invoice["OrderID"]
+            write_record(cc, resource, schema, mdata, extraction_time)
+
+    return {resource: extraction_time}
+
+
 handlers = {
     "contractor_timesheets": handle_contractor_timesheets,
     "customer_sites": handle_customer_sites,
@@ -201,5 +221,6 @@ handlers = {
     "job_sections": handle_job_sections,
     # this is really a sub-stream to job_sections so can't be called directly
     "job_cost_centers": None,
+    "payable_invoices_cost_centers": handle_payable_invoices_cost_centers,
     "schedules_blocks": handle_schedules_blocks,
 }

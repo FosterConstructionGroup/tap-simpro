@@ -1,0 +1,13 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "IncomeAccountNo": { "type": ["null", "string"] },
+    "ExpenseAccountNo": { "type": ["null", "string"] },
+    "Type": { "type": ["null", "string"] },
+    "Archived": { "type": ["null", "boolean"] },
+    "IsMembershipCostCenter": { "type": ["null", "boolean"] }
+  }
+}
