@@ -163,9 +163,10 @@ async def handle_timesheets(session, resource, id, url, schema, mdata, extractio
     timesheets = await get_basic(session, resource, url)
 
     id_key = "EmployeeID" if resource == "employee_timesheets" else "ContractorID"
+    id_prefix = "e" if resource == "employee_timesheets" else "c"
 
     for t in timesheets:
-        t["ID"] = str(id) + "_" + t["Date"] + "_" + t["StartTime"]
+        t["ID"] = id_prefix + str(id) + "_" + t["Date"] + "_" + t["StartTime"]
         t[id_key] = id
         schedule_type = t["ScheduleType"]
 
