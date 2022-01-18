@@ -52,16 +52,22 @@ async def handle_job_sections(session, rows, schemas, state, mdata):
     sections_futures = []
     cost_centers_futures = []
 
+    # need this wrapper to return job ID, as otherwise there's no way to pass it through
+    async def get(id):
+        return (id, await get_basic(session, resource, f"jobs/{id}/sections/"))
+
     for job in rows:
         id = job["ID"]
-        sections_futures.append(get_basic(session, resource, f"jobs/{id}/sections/"))
+        sections_futures.append(get(id))
 
     sections = [
-        section for jobs in await await_futures(sections_futures) for section in jobs
+        (job_id, section)
+        for (job_id, job_sections) in await await_futures(sections_futures)
+        for section in job_sections
     ]
 
-    for s in sections:
-        s["JobID"] = id
+    for (job_id, s) in sections:
+        s["JobID"] = job_id
         write_record(s, resource, schema, mdata, extraction_time)
 
         if "job_cost_centers" in schemas:
@@ -88,8 +94,7 @@ async def handle_job_cost_centers(session, section, schemas, state, mdata):
 
     for c in cost_centers:
         c["SectionID"] = section_id
-
-    write_many(cost_centers, resource, schema, mdata, extraction_time)
+        write_record(c, resource, schema, mdata, extraction_time)
 
 
 async def handle_invoice_jobs(session, invoices, schemas, state, mdata):
