@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 import re
+from singer.bookmarks import get_bookmark
+
 from tap_simpro.utility import write_record, write_many, get_basic, await_futures, hash
 
 
@@ -128,7 +130,7 @@ async def handle_contractor_timesheets(session, contractors, schemas, state, mda
 
         futures.append(
             handle_timesheets(
-                session, resource, id, url, schema, mdata, extraction_time
+                session, resource, id, url, schema, state, mdata, extraction_time
             )
         )
 
@@ -150,7 +152,7 @@ async def handle_employee_timesheets(session, employees, schemas, state, mdata):
 
         futures.append(
             handle_timesheets(
-                session, resource, id, url, schema, mdata, extraction_time
+                session, resource, id, url, schema, state, mdata, extraction_time
             )
         )
 
@@ -159,7 +161,13 @@ async def handle_employee_timesheets(session, employees, schemas, state, mdata):
     return {resource: extraction_time}
 
 
-async def handle_timesheets(session, resource, id, url, schema, mdata, extraction_time):
+async def handle_timesheets(
+    session, resource, id, url, schema, state, mdata, extraction_time
+):
+    bookmark = get_bookmark(state, resource, "since")
+    start_date = bookmark[:10] if bookmark else "2022-01-01"
+    url = f"{url}&StartDate={start_date}"
+
     timesheets = await get_basic(session, resource, url)
 
     id_key = "EmployeeID" if resource == "employee_timesheets" else "ContractorID"
