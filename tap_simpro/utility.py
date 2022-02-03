@@ -43,7 +43,7 @@ async def get_resource(session, resource, bookmark):
         json = await get_basic(
             session,
             resource,
-            f"{get_endpoint(resource)}/?page_size=250&page={page}&orderby=-DateModified",
+            f"{get_endpoint(resource)}/?pageSize=250&page={page}&orderby=-DateModified",
         )
 
         fetch_details = has_details.get(resource, True)
