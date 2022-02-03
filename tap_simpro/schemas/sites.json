@@ -8,8 +8,11 @@
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
+        "Address": { "type": ["string"] },
         "City": { "type": ["string"] },
-        "State": { "type": ["string"] }
+        "State": { "type": ["string"] },
+        "PostalCode": { "type": ["string"] },
+        "Country": { "type": ["string"] }
       }
     },
     "PrimaryContact": {
