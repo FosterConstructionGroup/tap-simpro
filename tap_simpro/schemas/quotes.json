@@ -7,35 +7,35 @@
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
-        "Id": { "type": ["number"] }
+        "ID": { "type": ["number"] }
       }
     },
     "CustomerContact": {
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
-        "Id": { "type": ["number"] }
+        "ID": { "type": ["number"] }
       }
     },
     "Site": {
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
-        "Id": { "type": ["number"] }
+        "ID": { "type": ["number"] }
       }
     },
     "SiteContact": {
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
-        "Id": { "type": ["number"] }
+        "ID": { "type": ["number"] }
       }
     },
     "ConvertedFromLead": {
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
-        "Id": { "type": ["number"] }
+        "ID": { "type": ["number"] }
       }
     },
     "Description": { "type": ["string"] },
