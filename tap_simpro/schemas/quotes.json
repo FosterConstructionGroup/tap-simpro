@@ -1,0 +1,83 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Customer": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Id": { "type": ["number"] }
+      }
+    },
+    "CustomerContact": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Id": { "type": ["number"] }
+      }
+    },
+    "Site": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Id": { "type": ["number"] }
+      }
+    },
+    "SiteContact": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Id": { "type": ["number"] }
+      }
+    },
+    "ConvertedFromLead": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Id": { "type": ["number"] }
+      }
+    },
+    "Description": { "type": ["string"] },
+    "Name": { "type": ["string"] },
+    "Notes": { "type": ["string"] },
+    "Type": { "type": ["string"] },
+    "IsClosed": { "type": ["boolean"] },
+    "Stage": { "type": ["string"] },
+    "CustomerStage": { "type": ["string"] },
+    "JobNo": { "type": ["null", "string"] },
+    "IsVariation": { "type": ["boolean"] },
+    "LinkedJobId": { "type": ["number"] },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["number"] },
+        "Tax": { "type": ["number"] }
+      }
+    },
+    "Status": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Id": { "type": ["number"] },
+        "Name": { "type": ["string"] }
+      }
+    },
+    "ProjectManager": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Id": { "type": ["number"] }
+      }
+    },
+    "DateIssued": { "type": ["string"], "format": "date" },
+    "DueDate": { "type": ["null", "string"], "format": "date" },
+    "OrderNo": { "type": ["null", "string"] },
+    "RequestNo": { "type": ["null", "string"] },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    }
+  }
+}
