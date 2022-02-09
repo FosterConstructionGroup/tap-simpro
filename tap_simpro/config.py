@@ -10,3 +10,7 @@ streams = {
 }
 
 has_details = {"payable_invoices": False}
+
+json_encoded_columns = {
+    "quotes": ["RequestNo", "Name", "Description", "Notes"]
+}

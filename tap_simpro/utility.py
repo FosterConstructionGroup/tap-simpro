@@ -1,4 +1,5 @@
 import os
+import json
 import hashlib
 import asyncio
 import singer
@@ -80,12 +81,15 @@ async def get_basic(session, resource, url):
                 return await resp.json()
 
 
-def transform_record(record, properties):
+def transform_record(record, properties, json_encoded_columns):
     if "CustomFields" in record:
         map = {}
         for field in record["CustomFields"]:
             map[field["CustomField"]["Name"]] = field["Value"]
         record["CustomFields"] = map
+
+    for col in json_encoded_columns:
+        record[col] = json.dumps(record[col])
 
     return record
 
