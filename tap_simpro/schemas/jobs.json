@@ -22,6 +22,7 @@
     "RequestNo": { "type": ["null", "string"] },
     "Name": { "type": ["null", "string"] },
     "Description": { "type": ["null", "string"] },
+    "Notes": { "type": ["null", "string"] },
     "DateIssued": { "type": ["null", "string"], "format": "date" },
     "DueDate": { "type": ["null", "string"], "format": "date" },
     "ProjectManager": {
