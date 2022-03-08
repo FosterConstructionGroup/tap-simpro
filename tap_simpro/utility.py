@@ -11,7 +11,8 @@ from tap_simpro.config import streams, has_details
 
 
 # constants
-baseUrl = "https://fosters.simprosuite.com/api/v1.0/companies/0"
+base_url = "https://fosters.simprosuite.com/api/v1.0/companies/0"
+strip_href_url = "/api/v1.0/companies/0/"
 
 sub_streams = set([x for v in streams.values() for x in v])
 
@@ -26,8 +27,6 @@ def get_endpoint(resource):
         return "setup/activities"
     elif resource == "cost_centers":
         return "setup/accounts/costCenters"
-    elif resource == "customers":
-        return "customers/companies"
     elif resource == "payable_invoices":
         return "accounts/payable/invoices"
     elif resource == "schedule_rates":
@@ -54,10 +53,15 @@ async def get_resource(session, resource, bookmark):
         page += 1
 
         if fetch_details:
-            details_futures = [
-                get_basic(session, resource, f"{get_endpoint(resource)}/{row['ID']}")
-                for row in json
-            ]
+            details_futures = []
+            for row in json:
+                # use _href property if available, or use the default of resource plus ID
+                details_url = (
+                    f"{get_endpoint(resource)}/{row['ID']}"
+                    if "_href" not in row
+                    else (row["_href"].replace(strip_href_url, ""))
+                )
+                details_futures.append(get_basic(session, resource, details_url))
             details_ls = await await_futures(details_futures)
 
             for d in details_ls:
@@ -75,7 +79,7 @@ async def get_resource(session, resource, bookmark):
 async def get_basic(session, resource, url):
     async with sem:
         with metrics.http_request_timer(resource) as timer:
-            async with await session.get(f"{baseUrl}/{url}") as resp:
+            async with await session.get(f"{base_url}/{url}") as resp:
                 timer.tags[metrics.Tag.http_status_code] = resp.status
                 resp.raise_for_status()
                 return await resp.json()
