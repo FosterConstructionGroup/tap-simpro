@@ -47,7 +47,7 @@
     "CustomerStage": { "type": ["string"] },
     "JobNo": { "type": ["null", "string"] },
     "IsVariation": { "type": ["boolean"] },
-    "LinkedJobId": { "type": ["number"] },
+    "LinkedJobID": { "type": ["null", "string"] },
     "Total": {
       "type": ["null", "object"],
       "additionalProperties": false,
@@ -60,7 +60,7 @@
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
-        "Id": { "type": ["number"] },
+        "ID": { "type": ["number"] },
         "Name": { "type": ["string"] }
       }
     },
@@ -68,7 +68,7 @@
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
-        "Id": { "type": ["number"] }
+        "ID": { "type": ["number"] }
       }
     },
     "DateIssued": { "type": ["string"], "format": "date" },
