@@ -17,4 +17,7 @@ json_encoded_columns = {
     "quotes": ["RequestNo", "Name", "Description", "Notes"],
 }
 
-resource_details_url_fns = {"quotes": lambda row: f'quotes/{row["ID"]}?display=all'}
+resource_details_url_fns = {
+    "jobs": lambda row: f'jobs/{row["ID"]}?display=all',
+    "quotes": lambda row: f'quotes/{row["ID"]}?display=all',
+}

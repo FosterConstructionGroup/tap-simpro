@@ -89,59 +89,29 @@ async def handle_invoice_jobs(session, invoices, schemas, state, mdata):
     return {resource: extraction_time}
 
 
-async def handle_job_sections(session, rows, schemas, state, mdata):
-    resource = "job_sections"
-    schema = schemas[resource]
+async def handle_job_sections_cost_centers(session, rows, schemas, state, mdata):
+    s_resource = "job_sections"
+    s_schema = schemas[s_resource]
+    c_resource = "job_cost_centers"
+    c_schema = schemas.get(c_resource)
+
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    new_bookmarks = {resource: extraction_time}
-
-    sections_futures = []
-    cost_centers_futures = []
-
-    # need this wrapper to return job ID, as otherwise there's no way to pass it through
-    async def get(id):
-        return (id, await get_basic(session, resource, f"jobs/{id}/sections/"))
+    new_bookmarks = {s_resource: extraction_time}
 
     for job in rows:
-        id = job["ID"]
-        sections_futures.append(get(id))
+        for s in job["Sections"]:
+            s["JobID"] = job["ID"]
+            write_record(s, s_resource, s_schema, mdata, extraction_time)
 
-    sections = [
-        (job_id, section)
-        for (job_id, job_sections) in await await_futures(sections_futures)
-        for section in job_sections
-    ]
+            if c_resource in schemas:
+                new_bookmarks[c_resource] = extraction_time
+                for c in s["CostCenters"]:
+                    c["JobID"] = -job["ID"]
+                    c["SectionID"] = s["ID"]
+                    write_record(c, c_resource, c_schema, mdata, extraction_time)
 
-    for (job_id, s) in sections:
-        s["JobID"] = job_id
-        write_record(s, resource, schema, mdata, extraction_time)
-
-        if "job_cost_centers" in schemas:
-            cost_centers_futures.append(
-                handle_job_cost_centers(session, s, schemas, state, mdata)
-            )
-            new_bookmarks["job_cost_centers"] = extraction_time
-
-    await await_futures(cost_centers_futures)
     return new_bookmarks
-
-
-async def handle_job_cost_centers(session, section, schemas, state, mdata):
-    resource = "job_cost_centers"
-    schema = schemas[resource]
-    extraction_time = datetime.now(timezone.utc).astimezone()
-
-    job_id = section["JobID"]
-    section_id = section["ID"]
-
-    cost_centers = await get_basic(
-        session, resource, f"jobs/{job_id}/sections/{section_id}/costCenters/"
-    )
-
-    for c in cost_centers:
-        c["SectionID"] = section_id
-        write_record(c, resource, schema, mdata, extraction_time)
 
 
 async def handle_payable_invoices_cost_centers(
@@ -251,7 +221,7 @@ handlers = {
     "customer_sites": handle_customer_sites,
     "employee_timesheets": handle_employee_timesheets,
     "invoice_jobs": handle_invoice_jobs,
-    "job_sections": handle_job_sections,
+    "job_sections": handle_job_sections_cost_centers,
     # this is really a sub-stream to job_sections so can't be called directly
     "job_cost_centers": None,
     "payable_invoices_cost_centers": handle_payable_invoices_cost_centers,
