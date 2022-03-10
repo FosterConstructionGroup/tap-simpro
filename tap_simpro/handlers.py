@@ -5,6 +5,28 @@ from singer.bookmarks import get_bookmark
 from tap_simpro.utility import write_record, write_many, get_basic, await_futures, hash
 
 
+async def handle_contractor_timesheets(session, contractors, schemas, state, mdata):
+    resource = "contractor_timesheets"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    futures = []
+
+    for c in contractors:
+        id = c["ID"]
+        url = f"contractors/{id}/timesheets/?Includes=Job,Activity"
+
+        futures.append(
+            handle_timesheets(
+                session, resource, id, url, schema, state, mdata, extraction_time
+            )
+        )
+
+    await await_futures(futures)
+
+    return {resource: extraction_time}
+
+
 async def handle_customer_sites(session, rows, schemas, state, mdata):
     resource = "customer_sites"
     schema = schemas[resource]
@@ -22,20 +44,48 @@ async def handle_customer_sites(session, rows, schemas, state, mdata):
     return {resource: extraction_time}
 
 
-async def handle_schedules_blocks(session, rows, schemas, state, mdata):
-    resource = "schedules_blocks"
+async def handle_employee_timesheets(session, employees, schemas, state, mdata):
+    resource = "employee_timesheets"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    for row in rows:
-        i = 0
-        for block in row["Blocks"]:
-            i += 1
-            id = row["ID"]
-            block["ID"] = f"{id}_{i}"
-            block["ScheduleID"] = id
-            write_record(block, resource, schema, mdata, extraction_time)
+    futures = []
 
+    for e in employees:
+        id = e["ID"]
+        url = f"employees/{id}/timesheets/?Includes=Job,Activity"
+
+        futures.append(
+            handle_timesheets(
+                session, resource, id, url, schema, state, mdata, extraction_time
+            )
+        )
+
+    await await_futures(futures)
+
+    return {resource: extraction_time}
+
+
+async def handle_invoice_jobs(session, invoices, schemas, state, mdata):
+    resource = "invoice_jobs"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    ls = []
+
+    for invoice in invoices:
+        invoice_id = invoice["ID"]
+        jobs = invoice["Jobs"]
+
+        for j in jobs:
+            j["InvoiceID"] = invoice_id
+            # rename row ID to JobID so it's clearer
+            j["JobID"] = j["ID"]
+            j["ID"] = str(j["InvoiceID"]) + "_" + str(j["JobID"])
+
+        ls += jobs
+
+    write_many(ls, resource, schema, mdata, extraction_time)
     return {resource: extraction_time}
 
 
@@ -94,108 +144,6 @@ async def handle_job_cost_centers(session, section, schemas, state, mdata):
         write_record(c, resource, schema, mdata, extraction_time)
 
 
-async def handle_invoice_jobs(session, invoices, schemas, state, mdata):
-    resource = "invoice_jobs"
-    schema = schemas[resource]
-    extraction_time = datetime.now(timezone.utc).astimezone()
-
-    ls = []
-
-    for invoice in invoices:
-        invoice_id = invoice["ID"]
-        jobs = invoice["Jobs"]
-
-        for j in jobs:
-            j["InvoiceID"] = invoice_id
-            # rename row ID to JobID so it's clearer
-            j["JobID"] = j["ID"]
-            j["ID"] = str(j["InvoiceID"]) + "_" + str(j["JobID"])
-
-        ls += jobs
-
-    write_many(ls, resource, schema, mdata, extraction_time)
-    return {resource: extraction_time}
-
-
-async def handle_contractor_timesheets(session, contractors, schemas, state, mdata):
-    resource = "contractor_timesheets"
-    schema = schemas[resource]
-    extraction_time = datetime.now(timezone.utc).astimezone()
-
-    futures = []
-
-    for c in contractors:
-        id = c["ID"]
-        url = f"contractors/{id}/timesheets/?Includes=Job,Activity"
-
-        futures.append(
-            handle_timesheets(
-                session, resource, id, url, schema, state, mdata, extraction_time
-            )
-        )
-
-    await await_futures(futures)
-
-    return {resource: extraction_time}
-
-
-async def handle_employee_timesheets(session, employees, schemas, state, mdata):
-    resource = "employee_timesheets"
-    schema = schemas[resource]
-    extraction_time = datetime.now(timezone.utc).astimezone()
-
-    futures = []
-
-    for e in employees:
-        id = e["ID"]
-        url = f"employees/{id}/timesheets/?Includes=Job,Activity"
-
-        futures.append(
-            handle_timesheets(
-                session, resource, id, url, schema, state, mdata, extraction_time
-            )
-        )
-
-    await await_futures(futures)
-
-    return {resource: extraction_time}
-
-
-async def handle_timesheets(
-    session, resource, id, url, schema, state, mdata, extraction_time
-):
-    bookmark = get_bookmark(state, resource, "since")
-    start_date = bookmark[:10] if bookmark else "2022-01-01"
-    url = f"{url}&StartDate={start_date}"
-
-    timesheets = await get_basic(session, resource, url)
-
-    id_key = "EmployeeID" if resource == "employee_timesheets" else "ContractorID"
-    id_prefix = "e" if resource == "employee_timesheets" else "c"
-
-    for t in timesheets:
-        t["ID"] = id_prefix + str(id) + "_" + t["Date"] + "_" + t["StartTime"]
-        t[id_key] = id
-        schedule_type = t["ScheduleType"]
-
-        if schedule_type == "Job":
-            reg = re.match(
-                r"^/api/v1.0/companies/\d/jobs/(\d+)/sections/\d+/costCenters/(\d+)/schedules/(\d+)$",
-                t["_href"],
-            )
-            t["JobID"] = reg[1]
-            t["CostCenterID"] = reg[2]
-            t["ScheduleID"] = reg[3]
-        elif schedule_type == "Activity":
-            reg = re.match(
-                r"^/api/v1.0/companies/\d/activitySchedules/(\d+)$",
-                t["_href"],
-            )
-            t["ActivityScheduleID"] = reg[1]
-
-        write_record(t, resource, schema, mdata, extraction_time)
-
-
 async def handle_payable_invoices_cost_centers(
     session, invoices, schemas, state, mdata
 ):
@@ -244,6 +192,58 @@ async def handle_quote_sections_cost_centers(session, rows, schemas, state, mdat
                     write_record(c, c_resource, c_schema, mdata, extraction_time)
 
     return new_bookmarks
+
+
+async def handle_schedules_blocks(session, rows, schemas, state, mdata):
+    resource = "schedules_blocks"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    for row in rows:
+        i = 0
+        for block in row["Blocks"]:
+            i += 1
+            id = row["ID"]
+            block["ID"] = f"{id}_{i}"
+            block["ScheduleID"] = id
+            write_record(block, resource, schema, mdata, extraction_time)
+
+    return {resource: extraction_time}
+
+
+async def handle_timesheets(
+    session, resource, id, url, schema, state, mdata, extraction_time
+):
+    bookmark = get_bookmark(state, resource, "since")
+    start_date = bookmark[:10] if bookmark else "2022-01-01"
+    url = f"{url}&StartDate={start_date}"
+
+    timesheets = await get_basic(session, resource, url)
+
+    id_key = "EmployeeID" if resource == "employee_timesheets" else "ContractorID"
+    id_prefix = "e" if resource == "employee_timesheets" else "c"
+
+    for t in timesheets:
+        t["ID"] = id_prefix + str(id) + "_" + t["Date"] + "_" + t["StartTime"]
+        t[id_key] = id
+        schedule_type = t["ScheduleType"]
+
+        if schedule_type == "Job":
+            reg = re.match(
+                r"^/api/v1.0/companies/\d/jobs/(\d+)/sections/\d+/costCenters/(\d+)/schedules/(\d+)$",
+                t["_href"],
+            )
+            t["JobID"] = reg[1]
+            t["CostCenterID"] = reg[2]
+            t["ScheduleID"] = reg[3]
+        elif schedule_type == "Activity":
+            reg = re.match(
+                r"^/api/v1.0/companies/\d/activitySchedules/(\d+)$",
+                t["_href"],
+            )
+            t["ActivityScheduleID"] = reg[1]
+
+        write_record(t, resource, schema, mdata, extraction_time)
 
 
 handlers = {
