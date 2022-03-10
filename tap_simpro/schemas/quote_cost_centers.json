@@ -1,0 +1,35 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "QuoteID": { "type": ["string"] },
+    "SectionID": { "type": ["string"] },
+    "ID": { "type": ["string"] },
+    "CostCenter": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["string"] },
+        "Name": { "type": ["string"] }
+      }
+    },
+    "Name": { "type": ["null", "string"] },
+    "DisplayOrder": { "type": ["number"] },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["number"] },
+        "Tax": { "type": ["number"] },
+        "IncTax": { "type": ["number"] },
+        "TaxCode": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["string"] }
+          }
+        }
+      }
+    }
+  }
+}

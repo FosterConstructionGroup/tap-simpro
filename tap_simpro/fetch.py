@@ -4,7 +4,7 @@ from tap_simpro.utility import (
     get_resource,
     transform_record,
 )
-from tap_simpro.config import streams, json_encoded_columns
+from tap_simpro.config import streams, json_encoded_columns, resource_details_url_fns
 from tap_simpro.handlers import handlers
 from tap_simpro.utility import write_many
 
@@ -18,8 +18,12 @@ async def handle_resource(session, resource, schemas, state, mdata):
     new_bookmark = {resource: extraction_time}
 
     rows = [
-        transform_record(row, schema["properties"], json_encoded_columns.get(resource, []))
-        for row in await get_resource(session, resource, bookmark)
+        transform_record(
+            row, schema["properties"], json_encoded_columns.get(resource, [])
+        )
+        for row in await get_resource(
+            session, resource, bookmark, resource_details_url_fns.get(resource)
+        )
     ]
 
     for substream in streams.get(resource, []):

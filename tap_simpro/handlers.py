@@ -221,6 +221,31 @@ async def handle_payable_invoices_cost_centers(
     return {resource: extraction_time}
 
 
+async def handle_quote_sections_cost_centers(session, rows, schemas, state, mdata):
+    s_resource = "quote_sections"
+    s_schema = schemas[s_resource]
+    c_resource = "quote_cost_centers"
+    c_schema = schemas.get(c_resource)
+
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    new_bookmarks = {s_resource: extraction_time}
+
+    for quote in rows:
+        for s in quote["Sections"]:
+            s["QuoteID"] = quote["ID"]
+            write_record(s, s_resource, s_schema, mdata, extraction_time)
+
+            if c_resource in schemas:
+                new_bookmarks[c_resource] = extraction_time
+                for c in s["CostCenters"]:
+                    c["QuoteID"] = quote["ID"]
+                    c["SectionID"] = s["ID"]
+                    write_record(c, c_resource, c_schema, mdata, extraction_time)
+
+    return new_bookmarks
+
+
 handlers = {
     "contractor_timesheets": handle_contractor_timesheets,
     "customer_sites": handle_customer_sites,
@@ -231,4 +256,7 @@ handlers = {
     "job_cost_centers": None,
     "payable_invoices_cost_centers": handle_payable_invoices_cost_centers,
     "schedules_blocks": handle_schedules_blocks,
+    "quote_sections": handle_quote_sections_cost_centers,
+    # this is really a sub-stream to quote_sections so can't be called directly
+    "quote_cost_centers": None,
 }

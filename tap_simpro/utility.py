@@ -31,7 +31,7 @@ def get_endpoint(resource):
     }.get(resource, to_camel_case(resource))
 
 
-async def get_resource(session, resource, bookmark):
+async def get_resource(session, resource, bookmark, get_details_url=None):
     ls = []
     page = 1
 
@@ -51,9 +51,11 @@ async def get_resource(session, resource, bookmark):
         if fetch_details:
             details_futures = []
             for row in json:
-                # use _href property if available, or use the default of resource plus ID
+                # use get_details_url lambda if provided, otherwise _href property if available, or use the default of resource plus ID
                 details_url = (
-                    f"{get_endpoint(resource)}/{row['ID']}"
+                    get_details_url(row)
+                    if get_details_url
+                    else f"{get_endpoint(resource)}/{row['ID']}"
                     if "_href" not in row
                     else (row["_href"].replace(strip_href_url, ""))
                 )

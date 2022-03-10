@@ -1,0 +1,10 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "QuoteID": { "type": ["string"] },
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "DisplayOrder": { "type": ["number"] }
+  }
+}
