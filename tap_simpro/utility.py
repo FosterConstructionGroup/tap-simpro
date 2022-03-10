@@ -21,18 +21,14 @@ sem = asyncio.Semaphore(32)
 
 
 def get_endpoint(resource):
-    if resource == "accounts":
-        return "setup/accounts/chartOfAccounts"
-    elif resource == "activities":
-        return "setup/activities"
-    elif resource == "cost_centers":
-        return "setup/accounts/costCenters"
-    elif resource == "payable_invoices":
-        return "accounts/payable/invoices"
-    elif resource == "schedule_rates":
-        return "setup/labor/scheduleRates"
-    else:
-        return to_camel_case(resource)
+    return {
+        "accounts": "setup/accounts/chartOfAccounts",
+        "activities": "setup/activities",
+        "cost_centers": "setup/accounts/costCenters",
+        "payable_invoices": "accounts/payable/invoices",
+        "project_status_codes": "setup/statusCodes/projects",
+        "schedule_rates": "setup/labor/scheduleRates",
+    }.get(resource, to_camel_case(resource))
 
 
 async def get_resource(session, resource, bookmark):
