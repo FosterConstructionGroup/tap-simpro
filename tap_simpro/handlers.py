@@ -107,7 +107,7 @@ async def handle_job_sections_cost_centers(session, rows, schemas, state, mdata)
             if c_resource in schemas:
                 new_bookmarks[c_resource] = extraction_time
                 for c in s["CostCenters"]:
-                    c["JobID"] = -job["ID"]
+                    c["JobID"] = job["ID"]
                     c["SectionID"] = s["ID"]
                     write_record(c, c_resource, c_schema, mdata, extraction_time)
 
