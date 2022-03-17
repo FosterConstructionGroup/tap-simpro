@@ -11,12 +11,13 @@ from tap_simpro.utility import (
     streams,
     sub_streams,
     format_date,
+    set_base_url,
 )
 from tap_simpro.fetch import handle_resource
 
 logger = singer.get_logger()
 
-REQUIRED_CONFIG_KEYS = ["access_token", "company_id"]
+REQUIRED_CONFIG_KEYS = ["access_token", "company_id", "base_url"]
 
 
 def load_schemas():
@@ -149,6 +150,7 @@ def main():
         do_discover()
     else:
         catalog = args.properties if args.properties else get_catalog()
+        set_base_url(args.config.get("base_url"))
         asyncio.get_event_loop().run_until_complete(
             run_async(args.config, args.state, catalog)
         )

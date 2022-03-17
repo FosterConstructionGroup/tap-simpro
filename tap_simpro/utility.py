@@ -11,13 +11,19 @@ from tap_simpro.config import streams, has_details
 
 
 # constants
-base_url = "https://fosters.simprosuite.com/api/v1.0/companies/0"
+# note this is going to be updated from __init__
+base_url = None
 strip_href_url = "/api/v1.0/companies/0/"
 
 sub_streams = set([x for v in streams.values() for x in v])
 
 # no rate limiting or concurrent request limit mentioned in docs https://developer.simprogroup.com/apidoc/
 sem = asyncio.Semaphore(32)
+
+
+def set_base_url(base):
+    global base_url
+    base_url = base + "/api/v1.0/companies/0"
 
 
 def get_endpoint(resource):

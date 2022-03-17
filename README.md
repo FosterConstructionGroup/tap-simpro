@@ -34,7 +34,11 @@ This tap:
    Create a JSON file called `config.json` containing your access token and the ID for the company that you want to sync data for.
 
    ```json
-   { "access_token": "your_access_token", "company_id": "0" }
+   {
+     "access_token": "your_access_token",
+     "company_id": "0",
+     "base_url": "https://yourcompany.simprosuite.com"
+   }
    ```
 
 3. Run the tap in discovery mode to get properties.json file

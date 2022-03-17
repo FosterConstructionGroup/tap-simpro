@@ -1,4 +1,5 @@
 {
   "access_token": "sample_token",
-  "company_id": "0"
+  "company_id": "0",
+  "base_url": "https://yourcompany.simprosuite.com"
 }
