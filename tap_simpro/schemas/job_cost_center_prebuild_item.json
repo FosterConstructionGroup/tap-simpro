@@ -1,0 +1,121 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Prebuild": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "PartNo": { "type": ["null", "string"] },
+        "Name": { "type": ["null", "string"] }
+      }
+    },
+    "BillableItem": { "type": ["null", "boolean"] },
+    "BillableStatus": { "type": ["null", "string"] },
+    "EstimatedTime": { "type": ["null", "number"] },
+    "FitTime": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Name": { "type": ["null", "string"] },
+        "Multiplier": { "type": ["null", "number"] }
+      }
+    },
+    "BasePrice": { "type": ["null", "number"] },
+    "Markup": { "type": ["null", "number"] },
+    "LaborCost": { "type": ["null", "number"] },
+    "SalesTaxCode": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Code": { "type": ["null", "string"] },
+        "Type": { "type": ["null", "string"] },
+        "Rate": { "type": ["null", "number"] }
+      }
+    },
+    "Totals": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "PriceEx": { "type": ["null", "number"] },
+        "PriceInc": { "type": ["null", "number"] },
+        "EstimatedTime": { "type": ["null", "number"] }
+      }
+    },
+    "DisplayOrder": { "type": ["null", "number"] },
+    "DateModified": { "type": ["null", "string"], "format": "date-time" },
+    "SellPrice": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["null", "number"] },
+        "IncTax": { "type": ["null", "number"] }
+      }
+    },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Qty": { "type": ["null", "number"] },
+        "Amount": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ExTax": { "type": ["null", "number"] },
+            "IncTax": { "type": ["null", "number"] }
+          }
+        }
+      }
+    },
+    "Claimed": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ToDate": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "Qty": { "type": ["null", "number"] },
+            "Amount": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ExTax": { "type": ["null", "number"] },
+                "IncTax": { "type": ["null", "number"] }
+              }
+            }
+          }
+        },
+        "Remaining": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "Qty": { "type": ["null", "number"] },
+            "Amount": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ExTax": { "type": ["null", "number"] },
+                "IncTax": { "type": ["null", "number"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "IncomeAccount": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Code": { "type": ["null", "string"] },
+        "Type": { "type": ["null", "string"] },
+        "Rate": { "type": ["null", "number"] }
+      }
+    }
+  }
+}

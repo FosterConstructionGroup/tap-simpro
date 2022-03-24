@@ -37,15 +37,19 @@ def get_endpoint(resource):
     }.get(resource, to_camel_case(resource))
 
 
-async def get_resource(session, resource, bookmark, get_details_url=None):
+async def get_resource(
+    session, resource, bookmark, get_details_url=None, endpoint_override=None
+):
     ls = []
     page = 1
+    page_size = 250
 
     while True:
+        endpoint = endpoint_override if endpoint_override else get_endpoint(resource)
         json = await get_basic(
             session,
             resource,
-            f"{get_endpoint(resource)}/?pageSize=250&page={page}&orderby=-DateModified",
+            f"{endpoint}/?pageSize={page_size}&page={page}&orderby=-DateModified",
         )
 
         fetch_details = has_details.get(resource, True)
@@ -61,7 +65,7 @@ async def get_resource(session, resource, bookmark, get_details_url=None):
                 details_url = (
                     get_details_url(row)
                     if get_details_url
-                    else f"{get_endpoint(resource)}/{row['ID']}"
+                    else f"{endpoint}/{row['ID']}"
                     if "_href" not in row
                     else (row["_href"].replace(strip_href_url, ""))
                 )
@@ -70,12 +74,16 @@ async def get_resource(session, resource, bookmark, get_details_url=None):
 
             for d in details_ls:
                 # note that simple string comparison sorting works here, thanks to the date formatting
-                if bookmark and d["DateModified"] < bookmark:
+                if bookmark and "DateModified" in d and d["DateModified"] < bookmark:
                     break
 
                 ls.append(d)
         else:
             ls += json
+
+        # otherwise will always finish with a guaranteed-empty request that will return []
+        if len(json) < page_size:
+            break
 
     return ls
 

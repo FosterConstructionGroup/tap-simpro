@@ -27,7 +27,7 @@ async def handle_resource(session, resource, schemas, state, mdata):
     ]
 
     for substream in streams.get(resource, []):
-        if substream in schemas and handlers[substream] is not None:
+        if substream in schemas and handlers.get(substream) is not None:
             new_sub_bookmark = await handlers[substream](
                 session, rows, schemas, state, mdata
             )

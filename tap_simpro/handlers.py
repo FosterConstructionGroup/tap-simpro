@@ -2,7 +2,14 @@ from datetime import datetime, timezone
 import re
 from singer.bookmarks import get_bookmark
 
-from tap_simpro.utility import write_record, write_many, get_basic, await_futures, hash
+from tap_simpro.utility import (
+    write_record,
+    write_many,
+    get_basic,
+    await_futures,
+    hash,
+    get_resource,
+)
 
 
 async def handle_contractor_timesheets(session, contractors, schemas, state, mdata):
@@ -95,9 +102,20 @@ async def handle_job_sections_cost_centers(session, rows, schemas, state, mdata)
     c_resource = "job_cost_centers"
     c_schema = schemas.get(c_resource)
 
+    items_handlers = {
+        "job_cost_center_catalog_item": "catalogs",
+        "job_cost_center_labor_item": "labor",
+        "job_cost_center_one_off_item": "oneOffs",
+        "job_cost_center_prebuild_item": "prebuilds",
+        "job_cost_center_service_fee": "serviceFees",
+    }
+
     extraction_time = datetime.now(timezone.utc).astimezone()
 
     new_bookmarks = {s_resource: extraction_time}
+
+    # far better parallelism getting everything at once than using `await` at the cost center granularity
+    items_futures = []
 
     for job in rows:
         for s in job["Sections"]:
@@ -111,7 +129,45 @@ async def handle_job_sections_cost_centers(session, rows, schemas, state, mdata)
                     c["SectionID"] = s["ID"]
                     write_record(c, c_resource, c_schema, mdata, extraction_time)
 
+                    for (stream, suffix) in items_handlers.items():
+                        if stream in schemas:
+                            path_vars = {
+                                "job_id": job["ID"],
+                                "section_id": s["ID"],
+                                "cost_center_id": c["ID"],
+                            }
+                            items_futures.append(
+                                handle_job_cost_center_item(
+                                    stream,
+                                    session,
+                                    path_vars,
+                                    suffix,
+                                    schemas[stream],
+                                    get_bookmark(state, stream, "since"),
+                                    mdata,
+                                    extraction_time,
+                                )
+                            )
+                            new_bookmarks[stream] = extraction_time
+
+    await await_futures(items_futures)
+
     return new_bookmarks
+
+
+async def handle_job_cost_center_item(
+    resource,
+    session,
+    path_vars,
+    endpoint_suffix,
+    schema,
+    bookmark,
+    mdata,
+    extraction_time,
+):
+    endpoint = f'jobs/{path_vars["job_id"]}/sections/{path_vars["section_id"]}/costCenters/{path_vars["cost_center_id"]}/{endpoint_suffix}'
+    rows = await get_resource(session, resource, bookmark, endpoint_override=endpoint)
+    write_many(rows, resource, schema, mdata, extraction_time)
 
 
 async def handle_payable_invoices_cost_centers(
@@ -222,11 +278,9 @@ handlers = {
     "employee_timesheets": handle_employee_timesheets,
     "invoice_jobs": handle_invoice_jobs,
     "job_sections": handle_job_sections_cost_centers,
-    # this is really a sub-stream to job_sections so can't be called directly
-    "job_cost_centers": None,
+    # job_cost_centers and children are sub-streams to job_sections so can't be called directly
     "payable_invoices_cost_centers": handle_payable_invoices_cost_centers,
     "schedules_blocks": handle_schedules_blocks,
     "quote_sections": handle_quote_sections_cost_centers,
-    # this is really a sub-stream to quote_sections so can't be called directly
-    "quote_cost_centers": None,
+    # quote_cost_centers is a sub-stream to quote_sections so can't be called directly
 }

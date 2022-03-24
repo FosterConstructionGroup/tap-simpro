@@ -1,0 +1,99 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "LaborType": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Name": { "type": ["null", "string"] }
+      }
+    },
+    "LaborRate": { "type": ["null", "number"] },
+    "LaborMarkup": { "type": ["null", "number"] },
+    "SalesTaxCode": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Code": { "type": ["null", "string"] },
+        "Type": { "type": ["null", "string"] },
+        "Rate": { "type": ["null", "number"] }
+      }
+    },
+    "ProjectedTime": { "type": ["null", "number"] },
+    "Ticked": { "type": ["null", "boolean"] },
+    "DateModified": { "type": ["null", "string"], "format": "date-time" },
+    "SellPrice": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["null", "number"] },
+        "IncTax": { "type": ["null", "number"] }
+      }
+    },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Qty": { "type": ["null", "number"] },
+        "Amount": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ExTax": { "type": ["null", "number"] },
+            "IncTax": { "type": ["null", "number"] }
+          }
+        }
+      }
+    },
+    "Claimed": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ToDate": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "Qty": { "type": ["null", "number"] },
+            "Amount": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ExTax": { "type": ["null", "number"] },
+                "IncTax": { "type": ["null", "number"] }
+              }
+            }
+          }
+        },
+        "Remaining": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "Qty": { "type": ["null", "number"] },
+            "Amount": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ExTax": { "type": ["null", "number"] },
+                "IncTax": { "type": ["null", "number"] }
+              }
+            }
+          }
+        }
+      }
+    },
+    "IncomeAccount": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] },
+        "Code": { "type": ["null", "string"] },
+        "Type": { "type": ["null", "string"] },
+        "Rate": { "type": ["null", "number"] }
+      }
+    }
+  }
+}

@@ -3,7 +3,15 @@ streams = {
     "customers": ["customer_sites"],
     "employees": ["employee_timesheets"],
     "invoices": ["invoice_jobs"],
-    "jobs": ["job_sections", "job_cost_centers"],
+    "jobs": [
+        "job_sections",
+        "job_cost_centers",
+        "job_cost_center_catalog_item",
+        "job_cost_center_labor_item",
+        "job_cost_center_one_off_item",
+        "job_cost_center_prebuild_item",
+        "job_cost_center_service_fee",
+    ],
     # disabled for now as the pagination is buggy
     # "payable_invoices": ["payable_invoices_cost_centers"],
     "schedules": ["schedules_blocks"],
