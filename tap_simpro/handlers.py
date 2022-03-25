@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import re
 from singer.bookmarks import get_bookmark
+from aiohttp import ClientResponseError
 
 from tap_simpro.utility import (
     write_record,
@@ -166,8 +167,17 @@ async def handle_job_cost_center_item(
     extraction_time,
 ):
     endpoint = f'jobs/{path_vars["job_id"]}/sections/{path_vars["section_id"]}/costCenters/{path_vars["cost_center_id"]}/{endpoint_suffix}'
-    rows = await get_resource(session, resource, bookmark, endpoint_override=endpoint)
-    write_many(rows, resource, schema, mdata, extraction_time)
+    try:
+        rows = await get_resource(
+            session, resource, bookmark, endpoint_override=endpoint
+        )
+        write_many(rows, resource, schema, mdata, extraction_time)
+    # service fees can throw a 404 instead of just returning [], so handle that case
+    except ClientResponseError as e:
+        if e.status == 404:
+            pass
+        else:
+            raise e
 
 
 async def handle_payable_invoices_cost_centers(
