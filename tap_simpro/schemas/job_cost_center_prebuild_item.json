@@ -3,6 +3,9 @@
   "additionalProperties": false,
   "properties": {
     "ID": { "type": ["string"] },
+    "job_id": { "type": ["string"] },
+    "section_id": { "type": ["string"] },
+    "cost_center_id": { "type": ["string"] },
     "Prebuild": {
       "type": ["null", "object"],
       "additionalProperties": false,

@@ -168,9 +168,10 @@ async def handle_job_cost_center_item(
 ):
     endpoint = f'jobs/{path_vars["job_id"]}/sections/{path_vars["section_id"]}/costCenters/{path_vars["cost_center_id"]}/{endpoint_suffix}'
     try:
-        rows = await get_resource(
+        base_rows = await get_resource(
             session, resource, bookmark, endpoint_override=endpoint
         )
+        rows = [{**row, **path_vars} for row in base_rows]
         write_many(rows, resource, schema, mdata, extraction_time)
     # service fees can throw a 404 instead of just returning [], so handle that case
     except ClientResponseError as e:
