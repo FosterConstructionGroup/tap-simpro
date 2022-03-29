@@ -54,6 +54,14 @@
         "Tax": { "type": ["number"] }
       }
     },
-    "CompletedDate": { "type": ["null", "string"], "format": "date" }
+    "CompletedDate": { "type": ["null", "string"], "format": "date" },
+    "CustomFields": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Quantity Surveyor": { "type": ["null", "string"] },
+        "Site Manager": { "type": ["null", "string"] }
+      }
+    }
   }
 }
