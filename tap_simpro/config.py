@@ -4,6 +4,7 @@ streams = {
     "employees": ["employee_timesheets"],
     "invoices": ["invoice_jobs"],
     "jobs": [
+        "job_tags",
         "job_sections",
         "job_cost_centers",
         "job_cost_center_catalog_item",

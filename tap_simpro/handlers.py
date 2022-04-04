@@ -97,6 +97,21 @@ async def handle_invoice_jobs(session, invoices, schemas, state, mdata):
     return {resource: extraction_time}
 
 
+async def handle_job_tags(session, jobs, schemas, state, mdata):
+    resource = "job_tags"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    for job in jobs:
+        for tag in job.get("Tags", []):
+            tag["JobID"] = job["ID"]
+            tag["TagID"] = tag["ID"]
+            tag["ID"] = str(tag["JobID"]) + "_" + str(tag["TagID"])
+
+            write_record(tag, resource, schema, mdata, extraction_time)
+    return {resource: extraction_time}
+
+
 async def handle_job_sections_cost_centers(session, rows, schemas, state, mdata):
     s_resource = "job_sections"
     s_schema = schemas[s_resource]
@@ -281,6 +296,7 @@ handlers = {
     "customer_sites": handle_customer_sites,
     "employee_timesheets": handle_employee_timesheets,
     "invoice_jobs": handle_invoice_jobs,
+    "job_tags": handle_job_tags,
     "job_sections": handle_job_sections_cost_centers,
     # job_cost_centers and children are sub-streams to job_sections so can't be called directly
     "payable_invoices_cost_centers": handle_payable_invoices_cost_centers,

@@ -1,0 +1,10 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "JobID": { "type": ["string"] },
+    "TagID": { "type": ["string"] },
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["string"] }
+  }
+}
