@@ -1,0 +1,66 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["number"] },
+    "Type": { "type": ["null", "string"] },
+    "Description": { "type": ["null", "string"] },
+    "IsInventoryItem": { "type": ["null", "boolean"] },
+    "AssignedTo": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["null", "number"] },
+        "Job": { "type": ["null", "number"] },
+        "Section": { "type": ["null", "number"] },
+        "CostCenter": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["null", "number"] }
+          }
+        }
+      }
+    },
+    "Stage": { "type": ["null", "string"] },
+    "Status": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "StatusAutoAdjust": { "type": ["null", "boolean"] },
+    "DateIssued": { "type": ["null", "string"], "format": "date" },
+    "Vendor": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "QuoteNo": { "type": ["null", "string"] },
+    "Reference": { "type": ["null", "string"] },
+    "DueDate": { "type": ["null", "string"], "format": "date" },
+    "VendorQuote": { "type": ["null", "number"] },
+    "VendorNotes": { "type": ["null", "string"] },
+    "PrivateNotes": { "type": ["null", "string"] },
+    "CreatedBy": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "Archived": { "type": ["null", "boolean"] },
+    "DateModified": { "type": ["null", "string"], "format": "date-time" },
+    "Totals": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["number"] },
+        "IncTax": { "type": ["number"] }
+      }
+    }
+  }
+}
