@@ -1,0 +1,25 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "VendorOrderID": { "type": ["number"] },
+    "CostCenterID": { "type": ["null", "number"] },
+    "Catalog": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "Price": { "type": ["number"] },
+    "Quantity": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Received": { "type": ["number"] },
+        "Total": { "type": ["number"] }
+      }
+    },
+    "Total": { "type": ["number"] }
+  }
+}

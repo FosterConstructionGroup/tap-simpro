@@ -298,6 +298,45 @@ async def handle_timesheets(
         write_record(t, resource, schema, mdata, extraction_time)
 
 
+async def handle_vendor_order_item_allocations(
+    session, vendor_orders, schemas, state, mdata
+):
+    resource = "vendor_order_item_allocations"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    async def handler(v):
+        endpoint = f'vendorOrders/{v["ID"]}/catalogs'
+
+        rows = await get_resource(
+            session,
+            resource,
+            None,
+            endpoint_override=endpoint,
+            get_details_url=lambda row: f'{endpoint}/{row["Catalog"]["ID"]}',
+        )
+
+        for r in rows:
+            for a in r["Allocations"]:
+                a["VendorOrderID"] = v["ID"]
+                a["CostCenterID"] = v.get("AssignedTo", {}).get("ID")
+                a["Catalog"] = r["Catalog"]
+                a["Price"] = r["Price"]
+
+        return rows
+
+    base_rows = await await_futures([handler(v) for v in vendor_orders])
+    flattened = [
+        a
+        for vendor_order in base_rows
+        for row in vendor_order
+        for a in row["Allocations"]
+    ]
+    write_many(flattened, resource, schema, mdata, extraction_time)
+
+    return {resource: extraction_time}
+
+
 handlers = {
     "contractor_timesheets": handle_contractor_timesheets,
     "customer_sites": handle_customer_sites,
@@ -310,4 +349,5 @@ handlers = {
     "schedules_blocks": handle_schedules_blocks,
     "quote_sections": handle_quote_sections_cost_centers,
     # quote_cost_centers is a sub-stream to quote_sections so can't be called directly
+    "vendor_order_item_allocations": handle_vendor_order_item_allocations,
 }
