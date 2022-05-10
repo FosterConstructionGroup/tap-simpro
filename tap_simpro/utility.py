@@ -45,6 +45,9 @@ async def get_resource(
     page_size = 250
 
     while True:
+        # needed to break out of nested loop
+        break_loop = False
+
         endpoint = endpoint_override if endpoint_override else get_endpoint(resource)
         json = await get_basic(
             session,
@@ -75,11 +78,16 @@ async def get_resource(
             for d in details_ls:
                 # note that simple string comparison sorting works here, thanks to the date formatting
                 if bookmark and "DateModified" in d and d["DateModified"] < bookmark:
+                    # need to break out of nested loop
+                    break_loop = True
                     break
 
                 ls.append(d)
         else:
             ls += json
+
+        if break_loop:
+            break
 
         # otherwise will always finish with a guaranteed-empty request that will return []
         if len(json) < page_size:
