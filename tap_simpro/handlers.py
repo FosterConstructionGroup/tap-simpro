@@ -322,6 +322,7 @@ async def handle_vendor_order_item_allocations(
                 a["CostCenterID"] = v.get("AssignedTo", {}).get("ID")
                 a["Catalog"] = r["Catalog"]
                 a["Price"] = r["Price"]
+                a["ID"] = f'{v["ID"]}_{r["Catalog"]}'
 
         return rows
 
