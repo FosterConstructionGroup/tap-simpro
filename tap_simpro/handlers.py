@@ -366,10 +366,14 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
             if i_resource in schemas:
                 new_bookmarks[i_resource] = extraction_time
                 for c in r["Catalogs"]:
+                    # reset index with each new catalog item; only want to increment through the array
+                    i = 0
                     for item in c["Allocations"]:
+                        i += 1
                         item["VendorOrderReceiptID"] = r["ID"]
                         item["VendorOrderID"] = r["VendorOrderNo"]
                         item["CatalogID"] = c["Catalog"]["ID"]
+                        item["ID"] = f'{r["ID"]}_{c["Catalog"]["ID"]}_{i}'
                         write_record(item, i_resource, i_schema, mdata, extraction_time)
 
     return new_bookmarks

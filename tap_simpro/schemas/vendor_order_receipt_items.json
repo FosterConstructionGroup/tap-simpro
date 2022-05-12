@@ -2,6 +2,7 @@
   "type": ["null", "object"],
   "additionalProperties": false,
   "properties": {
+    "ID": { "type": ["number"] },
     "VendorOrderID": { "type": ["number"] },
     "VendorOrderReceiptID": { "type": ["number"] },
     "CatalogID": { "type": ["number"] },
