@@ -9,7 +9,7 @@
     "DueDate": { "type": ["null", "string"], "format": "date" },
     "ItemsReceived": { "type": ["boolean"] },
     "ItemsReceivedDate": { "type": ["null", "string"], "format": "date-time" },
-    "Totals": {
+    "Total": {
       "type": ["null", "object"],
       "additionalProperties": false,
       "properties": {
