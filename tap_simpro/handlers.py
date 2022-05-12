@@ -338,6 +338,43 @@ async def handle_vendor_order_item_allocations(
     return {resource: extraction_time}
 
 
+async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, mdata):
+    r_resource = "vendor_order_receipts"
+    r_schema = schemas[r_resource]
+    i_resource = "vendor_order_receipt_items"
+    i_schema = schemas.get(i_resource)
+
+    extraction_time = datetime.now(timezone.utc).astimezone()
+    new_bookmarks = {r_resource: extraction_time}
+
+    receipt_responses = await await_futures(
+        [
+            get_resource(
+                session,
+                r_resource,
+                None,
+                endpoint_override=f'vendorOrders/{v["ID"]}/receipts',
+            )
+            for v in vendor_orders
+        ]
+    )
+
+    for res in receipt_responses:
+        for r in res:
+            write_record(r, r_resource, r_schema, mdata, extraction_time)
+
+            if i_resource in schemas:
+                new_bookmarks[i_resource] = extraction_time
+                for c in r["Catalogs"]:
+                    for item in c["Allocations"]:
+                        item["VendorOrderReceiptID"] = r["ID"]
+                        item["VendorOrderID"] = r["VendorOrderNo"]
+                        item["CatalogID"] = c["Catalog"]["ID"]
+                        write_record(item, i_resource, i_schema, mdata, extraction_time)
+
+    return new_bookmarks
+
+
 handlers = {
     "contractor_timesheets": handle_contractor_timesheets,
     "customer_sites": handle_customer_sites,
@@ -351,4 +388,6 @@ handlers = {
     "quote_sections": handle_quote_sections_cost_centers,
     # quote_cost_centers is a sub-stream to quote_sections so can't be called directly
     "vendor_order_item_allocations": handle_vendor_order_item_allocations,
+    "vendor_order_receipts": handle_vendor_order_receipts,
+    # vendor_order_receipt_items is a sub-stream to vendor_order_receipts so can't be called directly
 }

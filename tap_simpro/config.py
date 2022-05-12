@@ -17,7 +17,11 @@ streams = {
     # "payable_invoices": ["payable_invoices_cost_centers"],
     "schedules": ["schedules_blocks"],
     "quotes": ["quote_sections", "quote_cost_centers"],
-    "vendor_orders": ["vendor_order_item_allocations"],
+    "vendor_orders": [
+        "vendor_order_item_allocations",
+        "vendor_order_receipts",
+        "vendor_order_receipt_items",
+    ],
 }
 
 has_details = {"payable_invoices": False}
