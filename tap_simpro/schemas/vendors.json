@@ -1,0 +1,17 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Name": { "type": ["null", "string"] },
+    "DateCreated": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "Archived": { "type": ["null", "boolean"] }
+  }
+}
