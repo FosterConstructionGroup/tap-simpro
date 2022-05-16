@@ -15,6 +15,7 @@
     },
     "Name": { "type": ["null", "string"] },
     "DisplayOrder": { "type": ["number"] },
+    "ItemsLocked": { "type": ["null", "boolean"] },
     "Total": {
       "type": ["null", "object"],
       "additionalProperties": false,
@@ -31,6 +32,41 @@
         }
       }
     },
-    "Claimed": { "type": ["null", "boolean"] }
+    "Claimed": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ToDate": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "Percent": { "type": ["null", "number"] },
+            "Amount": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ExTax": { "type": ["null", "number"] },
+                "IncTax": { "type": ["null", "number"] }
+              }
+            }
+          }
+        },
+        "Remaining": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "Percent": { "type": ["null", "number"] },
+            "Amount": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ExTax": { "type": ["null", "number"] },
+                "IncTax": { "type": ["null", "number"] }
+              }
+            }
+          }
+        }
+      }
+    }
   }
 }
