@@ -13,6 +13,7 @@ streams = {
         "job_cost_center_prebuild_item",
         "job_cost_center_service_fee",
     ],
+    "job_work_orders": ["job_work_order_blocks"],
     # disabled for now as the pagination is buggy
     # "payable_invoices": ["payable_invoices_cost_centers"],
     "schedules": ["schedules_blocks"],

@@ -379,6 +379,23 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
     return new_bookmarks
 
 
+async def handle_job_work_order_blocks(session, rows, schemas, state, mdata):
+    resource = "job_work_order_blocks"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    for jwo in rows:
+        i = 0
+        for block in jwo["Blocks"]:
+            i += 1
+            id = jwo["ID"]
+            block["ID"] = f"{id}_{i}"
+            block["JobWorkOrderID"] = id
+            write_record(block, resource, schema, mdata, extraction_time)
+
+    return {resource: extraction_time}
+
+
 handlers = {
     "contractor_timesheets": handle_contractor_timesheets,
     "customer_sites": handle_customer_sites,
@@ -386,6 +403,7 @@ handlers = {
     "invoice_jobs": handle_invoice_jobs,
     "job_tags": handle_job_tags,
     "job_sections": handle_job_sections_cost_centers,
+    "job_work_order_blocks": handle_job_work_order_blocks,
     # job_cost_centers and children are sub-streams to job_sections so can't be called directly
     "payable_invoices_cost_centers": handle_payable_invoices_cost_centers,
     "schedules_blocks": handle_schedules_blocks,

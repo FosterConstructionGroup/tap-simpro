@@ -1,0 +1,18 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "JobWorkOrderID": { "type": ["number"] },
+    "Hrs": { "type": ["number"] },
+    "StartTime": { "type": ["string"] },
+    "EndTime": { "type": ["string"] },
+    "ScheduleRate": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["null", "number"] }
+      }
+    }
+  }
+}
