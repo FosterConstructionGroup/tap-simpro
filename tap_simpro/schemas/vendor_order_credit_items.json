@@ -1,0 +1,23 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["number"] },
+    "VendorOrderID": { "type": ["number"] },
+    "VendorOrderReceiptID": { "type": ["number"] },
+    "VendorOrderCreditID": { "type": ["number"] },
+    "Catalog": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "VendorPartNo": { "type": ["null", "string"] },
+    "VendorStockName": { "type": ["null", "string"] },
+    "Received": { "type": ["number"] },
+    "UnitPrice": { "type": ["number"] },
+    "CreditAmount": { "type": ["number"] },
+    "Total": { "type": ["number"] }
+  }
+}

@@ -8,6 +8,8 @@
     "DateIssued": { "type": ["null", "string"], "format": "date" },
     "DueDate": { "type": ["null", "string"], "format": "date" },
     "ItemsReceived": { "type": ["boolean"] },
+    "DateCreated": { "type": ["null", "string"], "format": "date-time" },
+    "DateModified": { "type": ["null", "string"], "format": "date-time" },
     "ItemsReceivedDate": { "type": ["null", "string"], "format": "date-time" },
     "Total": {
       "type": ["null", "object"],

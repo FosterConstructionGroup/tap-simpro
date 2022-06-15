@@ -1,0 +1,48 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["number"] },
+    "VendorOrderID": { "type": ["number"] },
+    "VendorOrderReceiptID": { "type": ["number"] },
+    "Type": { "type": ["null", "string"] },
+    "VendorCreditNo": { "type": ["string"] },
+    "DateIssued": { "type": ["null", "string"], "format": "date" },
+    "Currency": { "type": ["null", "string"] },
+    "ExchangeRate": { "type": ["number"] },
+    "TaxRounding": { "type": ["number"] },
+    "Catalog": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "DateCreated": { "type": ["null", "string"], "format": "date-time" },
+    "DateModified": { "type": ["null", "string"], "format": "date-time" },
+    "Freight": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["number"] },
+        "IncTax": { "type": ["number"] }
+      }
+    },
+    "RestockingFee": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["number"] },
+        "IncTax": { "type": ["number"] }
+      }
+    },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["number"] },
+        "IncTax": { "type": ["number"] }
+      }
+    }
+  }
+}

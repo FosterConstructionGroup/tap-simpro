@@ -22,6 +22,8 @@ streams = {
         "vendor_order_item_allocations",
         "vendor_order_receipts",
         "vendor_order_receipt_items",
+        "vendor_order_credits",
+        "vendor_order_credit_items",
     ],
 }
 

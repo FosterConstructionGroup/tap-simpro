@@ -344,6 +344,7 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
     i_resource = "vendor_order_receipt_items"
     i_schema = schemas.get(i_resource)
 
+    bookmark = get_bookmark(state, r_resource, "since")
     extraction_time = datetime.now(timezone.utc).astimezone()
     new_bookmarks = {r_resource: extraction_time}
 
@@ -352,29 +353,93 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
             get_resource(
                 session,
                 r_resource,
-                None,
+                bookmark,
                 endpoint_override=f'vendorOrders/{v["ID"]}/receipts',
             )
             for v in vendor_orders
         ]
     )
 
-    for res in receipt_responses:
-        for r in res:
-            write_record(r, r_resource, r_schema, mdata, extraction_time)
+    receipts = [r for res in receipt_responses for r in res]
 
-            if i_resource in schemas:
-                new_bookmarks[i_resource] = extraction_time
-                for c in r["Catalogs"]:
-                    # reset index with each new catalog item; only want to increment through the array
-                    i = 0
-                    for item in c["Allocations"]:
-                        i += 1
-                        item["VendorOrderReceiptID"] = r["ID"]
-                        item["VendorOrderID"] = r["VendorOrderNo"]
-                        item["CatalogID"] = c["Catalog"]["ID"]
-                        item["ID"] = f'{r["ID"]}_{c["Catalog"]["ID"]}_{i}'
-                        write_record(item, i_resource, i_schema, mdata, extraction_time)
+    for r in receipts:
+        # helpful for credits
+        r["VendorOrderID"] = r["VendorOrderNo"]
+        write_record(r, r_resource, r_schema, mdata, extraction_time)
+
+        if i_resource in schemas:
+            new_bookmarks[i_resource] = extraction_time
+            for c in r["Catalogs"]:
+                # reset index with each new catalog item; only want to increment through the array
+                i = 0
+                for item in c["Allocations"]:
+                    i += 1
+                    item["VendorOrderReceiptID"] = r["ID"]
+                    item["VendorOrderID"] = r["VendorOrderNo"]
+                    item["CatalogID"] = c["Catalog"]["ID"]
+                    item["ID"] = f'{r["ID"]}_{c["Catalog"]["ID"]}_{i}'
+                    write_record(item, i_resource, i_schema, mdata, extraction_time)
+
+    if "vendor_order_credits" in schemas:
+        credits_bookmarks = await handle_vendor_order_credits(
+            session, receipts, schemas, state, mdata
+        )
+
+    return {**new_bookmarks, **credits_bookmarks}
+
+
+async def handle_vendor_order_credits(
+    session, vendor_order_receipts, schemas, state, mdata
+):
+    c_resource = "vendor_order_credits"
+    c_schema = schemas[c_resource]
+    i_resource = "vendor_order_credit_items"
+    i_schema = schemas.get(i_resource)
+
+    bookmark = get_bookmark(state, c_resource, "since")
+    extraction_time = datetime.now(timezone.utc).astimezone()
+    new_bookmarks = {c_resource: extraction_time}
+
+    # separate function is the cleanest way to add the two parent reference fields
+    async def get_credits(r):
+        res = await get_resource(
+            session,
+            c_resource,
+            bookmark,
+            endpoint_override=f'vendorOrders/{r["VendorOrderID"]}/receipts/{r["ID"]}/credits',
+        )
+        for c in res:
+            c["VendorOrderID"] = r["VendorOrderID"]
+            c["VendorOrderReceiptID"] = r["ID"]
+        return res
+
+    async def get_items(c):
+        endpoint = f'vendorOrders/{c["VendorOrderID"]}/receipts/{c["VendorOrderReceiptID"]}/credits/{c["ID"]}/catalogs'
+        res = await get_resource(
+            session,
+            i_resource,
+            None,
+            get_details_url=lambda row: f'{endpoint}/{row["Catalog"]["ID"]}',
+            endpoint_override=endpoint,
+        )
+        for i in res:
+            i["VendorOrderID"] = c["VendorOrderID"]
+            i["VendorOrderReceiptID"] = c["VendorOrderReceiptID"]
+            i["VendorOrderCreditID"] = c["ID"]
+        return res
+
+    credit_responses = await await_futures(
+        [get_credits(r) for r in vendor_order_receipts]
+    )
+
+    credits = [c for res in credit_responses for c in res]
+    write_many(credits, c_resource, c_schema, mdata, extraction_time)
+
+    if i_resource in schemas:
+        new_bookmarks[i_resource] = extraction_time
+        items_responses = await await_futures([get_items(c) for c in credits])
+        items = [i for res in items_responses for i in res]
+        write_many(items, i_resource, i_schema, mdata, extraction_time)
 
     return new_bookmarks
 
@@ -411,5 +476,5 @@ handlers = {
     # quote_cost_centers is a sub-stream to quote_sections so can't be called directly
     "vendor_order_item_allocations": handle_vendor_order_item_allocations,
     "vendor_order_receipts": handle_vendor_order_receipts,
-    # vendor_order_receipt_items is a sub-stream to vendor_order_receipts so can't be called directly
+    # vendor_order_receipt_items, vendor_order_credits, vendor_order_credit_items are sub-streams to vendor_order_receipts so can't be called directly
 }

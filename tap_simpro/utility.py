@@ -54,6 +54,7 @@ async def get_resource(
             resource,
             f"{endpoint}/?pageSize={page_size}&page={page}&orderby=-DateModified",
         )
+        # print(json)
 
         fetch_details = has_details.get(resource, True)
 
