@@ -426,6 +426,7 @@ async def handle_vendor_order_credits(
             i["VendorOrderID"] = c["VendorOrderID"]
             i["VendorOrderReceiptID"] = c["VendorOrderReceiptID"]
             i["VendorOrderCreditID"] = c["ID"]
+            i["ID"] = f'{i["VendorOrderCreditID"]}_{i["Catalog"]["ID"]}'
         return res
 
     credit_responses = await await_futures(
