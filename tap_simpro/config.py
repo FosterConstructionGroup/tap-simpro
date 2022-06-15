@@ -27,7 +27,7 @@ streams = {
     ],
 }
 
-has_details = {"payable_invoices": False}
+has_details = {"catalogs": "date_only", "payable_invoices": "none"}
 
 json_encoded_columns = {
     "jobs": ["RequestNo", "Name", "Description", "Notes"],

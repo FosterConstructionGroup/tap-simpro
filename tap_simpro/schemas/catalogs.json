@@ -1,0 +1,9 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "PartNo": { "type": ["null", "string"] },
+    "Name": { "type": ["null", "string"] }
+  }
+}

@@ -56,36 +56,48 @@ async def get_resource(
         )
         # print(json)
 
-        fetch_details = has_details.get(resource, True)
+        details_type = has_details.get(resource, "details")
 
         if len(json) == 0:
             break
         page += 1
 
-        if fetch_details:
+        def _get_details_url(row):
+            return (
+                get_details_url(row)
+                if get_details_url
+                else f"{endpoint}/{row['ID']}"
+                if "_href" not in row
+                else (row["_href"].replace(strip_href_url, ""))
+            )
+
+        if details_type == "details":
             details_futures = []
             for row in json:
                 # use get_details_url lambda if provided, otherwise _href property if available, or use the default of resource plus ID
-                details_url = (
-                    get_details_url(row)
-                    if get_details_url
-                    else f"{endpoint}/{row['ID']}"
-                    if "_href" not in row
-                    else (row["_href"].replace(strip_href_url, ""))
+                details_futures.append(
+                    get_basic(session, resource, _get_details_url(row))
                 )
-                details_futures.append(get_basic(session, resource, details_url))
             details_ls = await await_futures(details_futures)
 
             for d in details_ls:
                 # note that simple string comparison sorting works here, thanks to the date formatting
                 if bookmark and "DateModified" in d and d["DateModified"] < bookmark:
-                    # need to break out of nested loop
+                    # needed to break out of nested loop
                     break_loop = True
                     break
 
                 ls.append(d)
         else:
             ls += json
+
+        # for catalog, don't need the details but can use to short-circuit the loop
+        if details_type == "date_only" and bookmark:
+            # safe as length is checked earlier
+            first = json[0]
+            res = await get_basic(session, resource, _get_details_url(first))
+            if "DateModified" in res and res["DateModified"] < bookmark:
+                break_loop = True
 
         if break_loop:
             break
