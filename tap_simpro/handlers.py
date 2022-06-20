@@ -314,7 +314,6 @@ async def handle_vendor_order_item_allocations(
             None,
             schema,
             endpoint_override=endpoint,
-            get_details_url=lambda row: f'{endpoint}/{row["Catalog"]["ID"]}',
         )
 
         for r in rows:

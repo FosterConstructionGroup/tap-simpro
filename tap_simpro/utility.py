@@ -50,19 +50,19 @@ async def get_resource(
         while True:
             specify_columns = resource in streams_specify_columns
             columns_query_string = (
-                f'&columns={",".join(schema["properties"].keys())}'
-                if specify_columns
-                else ""
+                ""
+                if not specify_columns
+                else f'&columns={",".join(schema["properties"].keys()) if streams_specify_columns[resource] == "from_schema" else streams_specify_columns[resource]}'
             )
+            # print(columns_query_string)
 
             endpoint = (
                 endpoint_override if endpoint_override else get_endpoint(resource)
             )
-            json = await get_basic(
-                session,
-                resource,
-                f"{endpoint}/?pageSize={page_size}&page={page}&Archived={archived}&orderby=-DateModified{columns_query_string}",
-            )
+            url = f"{endpoint}/?pageSize={page_size}&page={page}&Archived={archived}&orderby=-DateModified{columns_query_string}"
+
+            # print("URL", url)
+            json = await get_basic(session, resource, url)
             # print(json)
 
             if len(json) == 0:
@@ -70,6 +70,7 @@ async def get_resource(
             page += 1
 
             def _get_details_url(row):
+                # use get_details_url lambda if provided, otherwise _href property if available, or use the default of resource plus ID
                 return (
                     get_details_url(row)
                     if get_details_url
@@ -83,13 +84,12 @@ async def get_resource(
                 streams_with_details.get(resource, True) and not specify_columns
             )
             if has_details:
-                details_futures = []
-                for row in json:
-                    # use get_details_url lambda if provided, otherwise _href property if available, or use the default of resource plus ID
-                    details_futures.append(
+                details_ls = await await_futures(
+                    [
                         get_basic(session, resource, _get_details_url(row))
-                    )
-                details_ls = await await_futures(details_futures)
+                        for row in json
+                    ]
+                )
 
                 for d in details_ls:
                     # note that simple string comparison sorting works here, thanks to the date formatting
@@ -103,6 +103,11 @@ async def get_resource(
                     ls.append(d)
             else:
                 ls += json
+
+                # if the list returns DateModified too, then use that to return early
+                last_modified = json[-1].get("DateModified")
+                if bookmark and last_modified and last_modified < bookmark:
+                    return
 
             # otherwise will always finish with a guaranteed-empty request that will return []
             if len(json) < page_size:
