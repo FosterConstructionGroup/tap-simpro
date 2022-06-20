@@ -25,6 +25,10 @@
         "ExTax": { "type": ["null", "number"] },
         "IncTax": { "type": ["null", "number"] }
       }
+    },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
     }
   }
 }

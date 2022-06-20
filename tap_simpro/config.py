@@ -38,6 +38,8 @@ streams_specify_columns = set(
         "catalogs",
         "contacts",
         "employees",
+        "invoices",
+        "schedules",
         "sites",
         "vendor_order_item_allocations",
         "vendor_order_receipts",
@@ -46,6 +48,8 @@ streams_specify_columns = set(
     ]
 )
 streams_add_specified_columns = {
+    "invoices": ",Jobs",
+    "schedules": ",Blocks",
     "vendor_order_item_allocations": ",Allocations",
     "vendor_order_receipts": ",Catalogs",
 }
