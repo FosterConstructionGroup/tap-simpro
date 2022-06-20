@@ -22,7 +22,7 @@ async def handle_resource(session, resource, schemas, state, mdata):
             row, schema["properties"], json_encoded_columns.get(resource, [])
         )
         for row in await get_resource(
-            session, resource, bookmark, resource_details_url_fns.get(resource)
+            session, resource, bookmark, schema, resource_details_url_fns.get(resource)
         )
     ]
 

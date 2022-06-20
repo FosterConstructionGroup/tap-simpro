@@ -7,7 +7,7 @@ from singer import metadata
 import singer.metrics as metrics
 from datetime import datetime
 
-from tap_simpro.config import streams, has_details
+from tap_simpro.config import streams, streams_with_details, streams_specify_columns
 
 
 # constants
@@ -38,7 +38,7 @@ def get_endpoint(resource):
 
 
 async def get_resource(
-    session, resource, bookmark, get_details_url=None, endpoint_override=None
+    session, resource, bookmark, schema, get_details_url=None, endpoint_override=None
 ):
     ls = []
     page = 1
@@ -48,15 +48,20 @@ async def get_resource(
         # needed to break out of nested loop
         break_loop = False
 
+        specify_columns = streams_specify_columns.get(resource, False)
+        columns_query_string = (
+            f'&columns={",".join(schema["properties"].keys())}'
+            if specify_columns
+            else ""
+        )
+
         endpoint = endpoint_override if endpoint_override else get_endpoint(resource)
         json = await get_basic(
             session,
             resource,
-            f"{endpoint}/?pageSize={page_size}&page={page}&orderby=-DateModified",
+            f"{endpoint}/?pageSize={page_size}&page={page}&orderby=-DateModified{columns_query_string}",
         )
         # print(json)
-
-        details_type = has_details.get(resource, "details")
 
         if len(json) == 0:
             break
@@ -71,7 +76,8 @@ async def get_resource(
                 else (row["_href"].replace(strip_href_url, ""))
             )
 
-        if details_type == "details":
+        has_details = streams_with_details.get(resource, True)
+        if has_details:
             details_futures = []
             for row in json:
                 # use get_details_url lambda if provided, otherwise _href property if available, or use the default of resource plus ID
@@ -90,14 +96,6 @@ async def get_resource(
                 ls.append(d)
         else:
             ls += json
-
-        # for catalog, don't need the details but can use to short-circuit the loop
-        if details_type == "date_only" and bookmark:
-            # safe as length is checked earlier
-            first = json[0]
-            res = await get_basic(session, resource, _get_details_url(first))
-            if "DateModified" in res and res["DateModified"] < bookmark:
-                break_loop = True
 
         if break_loop:
             break

@@ -184,7 +184,7 @@ async def handle_job_cost_center_item(
     endpoint = f'jobs/{path_vars["job_id"]}/sections/{path_vars["section_id"]}/costCenters/{path_vars["cost_center_id"]}/{endpoint_suffix}'
     try:
         base_rows = await get_resource(
-            session, resource, bookmark, endpoint_override=endpoint
+            session, resource, bookmark, schema, endpoint_override=endpoint
         )
         rows = [{**row, **path_vars} for row in base_rows]
         write_many(rows, resource, schema, mdata, extraction_time)
@@ -312,6 +312,7 @@ async def handle_vendor_order_item_allocations(
             session,
             resource,
             None,
+            schema,
             endpoint_override=endpoint,
             get_details_url=lambda row: f'{endpoint}/{row["Catalog"]["ID"]}',
         )
@@ -354,6 +355,7 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
                 session,
                 r_resource,
                 bookmark,
+                r_schema,
                 endpoint_override=f'vendorOrders/{v["ID"]}/receipts',
             )
             for v in vendor_orders
@@ -406,6 +408,7 @@ async def handle_vendor_order_credits(
             session,
             c_resource,
             bookmark,
+            c_schema,
             endpoint_override=f'vendorOrders/{r["VendorOrderID"]}/receipts/{r["ID"]}/credits',
         )
         for c in res:
@@ -419,6 +422,7 @@ async def handle_vendor_order_credits(
             session,
             i_resource,
             None,
+            i_schema,
             get_details_url=lambda row: f'{endpoint}/{row["Catalog"]["ID"]}',
             endpoint_override=endpoint,
         )
