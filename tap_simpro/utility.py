@@ -107,12 +107,14 @@ async def get_resource(
 
                     ls.append(d)
             else:
-                ls += json
-
                 # if the list returns DateModified too, then use that to return early
                 last_modified = json[-1].get("DateModified")
                 if bookmark and last_modified and last_modified < bookmark:
+                    # only add rows updated since the bookmark
+                    ls += [r for r in json if r.get("DateModified") >= bookmark]
                     return
+                else:
+                    ls += json
 
             # otherwise will always finish with a guaranteed-empty request that will return []
             if len(json) < page_size:
