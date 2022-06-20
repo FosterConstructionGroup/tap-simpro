@@ -41,6 +41,8 @@ streams_specify_columns = set(
         "invoices",
         "schedules",
         "sites",
+        "vendor_order_credit_items",
+        "vendor_order_credits",
         "vendor_order_item_allocations",
         "vendor_order_receipts",
         "vendor_orders",
@@ -53,7 +55,13 @@ streams_add_specified_columns = {
     "vendor_order_item_allocations": ",Allocations",
     "vendor_order_receipts": ",Catalogs",
 }
-
+# Typically part of the URL but not present in the response
+streams_exclude_specified_columns = {
+    "vendor_order_credits": set(["VendorOrderID", "VendorOrderReceiptID"]),
+    "vendor_order_credit_items": set(
+        ["ID", "VendorOrderID", "VendorOrderReceiptID", "VendorOrderCreditID"]
+    ),
+}
 
 json_encoded_columns = {
     "jobs": ["RequestNo", "Name", "Description", "Notes"],

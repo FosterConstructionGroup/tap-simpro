@@ -12,6 +12,7 @@ from tap_simpro.config import (
     streams_with_details,
     streams_specify_columns,
     streams_add_specified_columns,
+    streams_exclude_specified_columns,
 )
 
 
@@ -49,19 +50,20 @@ async def get_resource(
     page_size = 250
     schema_fields = schema["properties"].keys()
 
+    specify_columns = resource in streams_specify_columns
+    if not specify_columns:
+        columns_query_string = ""
+    else:
+        to_exclude = streams_exclude_specified_columns.get(resource, [])
+        columns_excluding_specified = [f for f in schema_fields if f not in to_exclude]
+        columns_query_string = f'&columns={",".join(columns_excluding_specified) + streams_add_specified_columns.get(resource, "")}'
+    # print(columns_query_string)
+
     async def _get(archived):
         nonlocal ls
 
         page = 1
         while True:
-            specify_columns = resource in streams_specify_columns
-            columns_query_string = (
-                ""
-                if not specify_columns
-                else f'&columns={",".join(schema_fields) + streams_add_specified_columns.get(resource, "")}'
-            )
-            # print(columns_query_string)
-
             endpoint = (
                 endpoint_override if endpoint_override else get_endpoint(resource)
             )

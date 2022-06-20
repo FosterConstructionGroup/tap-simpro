@@ -423,7 +423,6 @@ async def handle_vendor_order_credits(
             i_resource,
             None,
             i_schema,
-            get_details_url=lambda row: f'{endpoint}/{row["Catalog"]["ID"]}',
             endpoint_override=endpoint,
         )
         for i in res:

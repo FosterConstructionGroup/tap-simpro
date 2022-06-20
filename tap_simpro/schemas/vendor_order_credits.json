@@ -11,13 +11,6 @@
     "Currency": { "type": ["null", "string"] },
     "ExchangeRate": { "type": ["number"] },
     "TaxRounding": { "type": ["number"] },
-    "Catalog": {
-      "type": ["null", "object"],
-      "additionalProperties": false,
-      "properties": {
-        "ID": { "type": ["number"] }
-      }
-    },
     "DateCreated": { "type": ["null", "string"], "format": "date-time" },
     "DateModified": { "type": ["null", "string"], "format": "date-time" },
     "Freight": {
