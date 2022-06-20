@@ -7,7 +7,12 @@ from singer import metadata
 import singer.metrics as metrics
 from datetime import datetime
 
-from tap_simpro.config import streams, streams_with_details, streams_specify_columns
+from tap_simpro.config import (
+    streams,
+    streams_with_details,
+    streams_specify_columns,
+    streams_add_specified_columns,
+)
 
 
 # constants
@@ -52,7 +57,7 @@ async def get_resource(
             columns_query_string = (
                 ""
                 if not specify_columns
-                else f'&columns={",".join(schema["properties"].keys()) if streams_specify_columns[resource] == "from_schema" else streams_specify_columns[resource]}'
+                else f'&columns={",".join(schema["properties"].keys()) + streams_add_specified_columns.get(resource, "")}'
             )
             # print(columns_query_string)
 

@@ -381,6 +381,7 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
                     item["ID"] = f'{r["ID"]}_{c["Catalog"]["ID"]}_{i}'
                     write_record(item, i_resource, i_schema, mdata, extraction_time)
 
+    credits_bookmarks = {}
     if "vendor_order_credits" in schemas:
         credits_bookmarks = await handle_vendor_order_credits(
             session, receipts, schemas, state, mdata
