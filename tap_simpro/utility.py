@@ -47,6 +47,7 @@ async def get_resource(
 ):
     ls = []
     page_size = 250
+    schema_fields = schema["properties"].keys()
 
     async def _get(archived):
         nonlocal ls
@@ -57,7 +58,7 @@ async def get_resource(
             columns_query_string = (
                 ""
                 if not specify_columns
-                else f'&columns={",".join(schema["properties"].keys()) + streams_add_specified_columns.get(resource, "")}'
+                else f'&columns={",".join(schema_fields) + streams_add_specified_columns.get(resource, "")}'
             )
             # print(columns_query_string)
 
@@ -122,7 +123,9 @@ async def get_resource(
 
     # no query string option to get archived and unarchived, so run it once with each
     await _get(False)
-    await _get(True)
+    # only run a second time if the field can be archived, or it'll just ignore the query parameter and fetch all fields a second time
+    if "Archived" in schema_fields:
+        await _get(True)
 
     return ls
 
