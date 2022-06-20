@@ -41,68 +41,73 @@ async def get_resource(
     session, resource, bookmark, schema, get_details_url=None, endpoint_override=None
 ):
     ls = []
-    page = 1
     page_size = 250
 
-    while True:
-        # needed to break out of nested loop
-        break_loop = False
+    async def _get(archived):
+        nonlocal ls
 
-        specify_columns = streams_specify_columns.get(resource, False)
-        columns_query_string = (
-            f'&columns={",".join(schema["properties"].keys())}'
-            if specify_columns
-            else ""
-        )
-
-        endpoint = endpoint_override if endpoint_override else get_endpoint(resource)
-        json = await get_basic(
-            session,
-            resource,
-            f"{endpoint}/?pageSize={page_size}&page={page}&orderby=-DateModified{columns_query_string}",
-        )
-        # print(json)
-
-        if len(json) == 0:
-            break
-        page += 1
-
-        def _get_details_url(row):
-            return (
-                get_details_url(row)
-                if get_details_url
-                else f"{endpoint}/{row['ID']}"
-                if "_href" not in row
-                else (row["_href"].replace(strip_href_url, ""))
+        page = 1
+        while True:
+            specify_columns = streams_specify_columns.get(resource, False)
+            columns_query_string = (
+                f'&columns={",".join(schema["properties"].keys())}'
+                if specify_columns
+                else ""
             )
 
-        has_details = streams_with_details.get(resource, True)
-        if has_details:
-            details_futures = []
-            for row in json:
-                # use get_details_url lambda if provided, otherwise _href property if available, or use the default of resource plus ID
-                details_futures.append(
-                    get_basic(session, resource, _get_details_url(row))
+            endpoint = (
+                endpoint_override if endpoint_override else get_endpoint(resource)
+            )
+            json = await get_basic(
+                session,
+                resource,
+                f"{endpoint}/?pageSize={page_size}&page={page}&Archived={archived}&orderby=-DateModified{columns_query_string}",
+            )
+            # print(json)
+
+            if len(json) == 0:
+                return
+            page += 1
+
+            def _get_details_url(row):
+                return (
+                    get_details_url(row)
+                    if get_details_url
+                    else f"{endpoint}/{row['ID']}"
+                    if "_href" not in row
+                    else (row["_href"].replace(strip_href_url, ""))
                 )
-            details_ls = await await_futures(details_futures)
 
-            for d in details_ls:
-                # note that simple string comparison sorting works here, thanks to the date formatting
-                if bookmark and "DateModified" in d and d["DateModified"] < bookmark:
-                    # needed to break out of nested loop
-                    break_loop = True
-                    break
+            has_details = streams_with_details.get(resource, True)
+            if has_details:
+                details_futures = []
+                for row in json:
+                    # use get_details_url lambda if provided, otherwise _href property if available, or use the default of resource plus ID
+                    details_futures.append(
+                        get_basic(session, resource, _get_details_url(row))
+                    )
+                details_ls = await await_futures(details_futures)
 
-                ls.append(d)
-        else:
-            ls += json
+                for d in details_ls:
+                    # note that simple string comparison sorting works here, thanks to the date formatting
+                    if (
+                        bookmark
+                        and "DateModified" in d
+                        and d["DateModified"] < bookmark
+                    ):
+                        return
 
-        if break_loop:
-            break
+                    ls.append(d)
+            else:
+                ls += json
 
-        # otherwise will always finish with a guaranteed-empty request that will return []
-        if len(json) < page_size:
-            break
+            # otherwise will always finish with a guaranteed-empty request that will return []
+            if len(json) < page_size:
+                return
+
+    # no query string option to get archived and unarchived, so run it once with each
+    await _get(False)
+    await _get(True)
 
     return ls
 

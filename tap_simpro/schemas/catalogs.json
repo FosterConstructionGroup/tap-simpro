@@ -5,6 +5,7 @@
     "ID": { "type": ["string"] },
     "PartNo": { "type": ["null", "string"] },
     "Name": { "type": ["null", "string"] },
+    "Archived": { "type": ["boolean"] },
     "DateModified": {
       "type": ["null", "string"],
       "format": "date-time"
