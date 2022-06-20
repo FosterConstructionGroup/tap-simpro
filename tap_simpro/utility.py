@@ -48,7 +48,7 @@ async def get_resource(
 
         page = 1
         while True:
-            specify_columns = streams_specify_columns.get(resource, False)
+            specify_columns = resource in streams_specify_columns
             columns_query_string = (
                 f'&columns={",".join(schema["properties"].keys())}'
                 if specify_columns
@@ -78,7 +78,10 @@ async def get_resource(
                     else (row["_href"].replace(strip_href_url, ""))
                 )
 
-            has_details = streams_with_details.get(resource, True)
+            # if columns are specified then don't need to fetch details
+            has_details = (
+                streams_with_details.get(resource, True) and not specify_columns
+            )
             if has_details:
                 details_futures = []
                 for row in json:

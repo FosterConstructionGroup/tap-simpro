@@ -27,9 +27,21 @@ streams = {
     ],
 }
 
-streams_with_details = {"catalogs": False, "payable_invoices": False}
+streams_with_details = {"payable_invoices": False}
 
-streams_specify_columns = {"catalogs": True}
+# handler doesn't fetch details for these either
+# note that this doesn't work well with array sub-streams as they aren't in the parent schema so don't get returned in the response. Don't want to add them to the parent schema either
+streams_specify_columns = set(
+    [
+        "accounts",
+        "activities",
+        "catalogs",
+        "contacts",
+        "employees",
+        "sites",
+        "vendors",
+    ]
+)
 
 json_encoded_columns = {
     "jobs": ["RequestNo", "Name", "Description", "Notes"],
