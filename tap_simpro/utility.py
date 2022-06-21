@@ -13,6 +13,7 @@ from tap_simpro.config import (
     streams_specify_columns,
     streams_add_specified_columns,
     streams_exclude_specified_columns,
+    streams_disable_filtering,
 )
 
 
@@ -49,6 +50,7 @@ async def get_resource(
     ls = []
     page_size = 250
     schema_fields = schema["properties"].keys()
+    disable_filtering = resource in streams_disable_filtering
 
     specify_columns = resource in streams_specify_columns
     if not specify_columns:
@@ -103,6 +105,7 @@ async def get_resource(
                     # note that simple string comparison sorting works here, thanks to the date formatting
                     if (
                         bookmark
+                        and not disable_filtering
                         and "DateModified" in d
                         and d["DateModified"] < bookmark
                     ):
@@ -112,7 +115,12 @@ async def get_resource(
             else:
                 # if the list returns DateModified too, then use that to return early
                 last_modified = json[-1].get("DateModified")
-                if bookmark and last_modified and last_modified < bookmark:
+                if (
+                    bookmark
+                    and not disable_filtering
+                    and last_modified
+                    and last_modified < bookmark
+                ):
                     # only add rows updated since the bookmark
                     ls += [r for r in json if r.get("DateModified") >= bookmark]
                     return

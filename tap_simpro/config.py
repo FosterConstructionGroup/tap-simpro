@@ -72,6 +72,16 @@ streams_exclude_specified_columns = {
         ["ID", "VendorOrderID", "VendorOrderReceiptID", "VendorOrderCreditID"]
     ),
 }
+# substreams can be updated more recently than the parent jobs, so date filtering can miss updated rows
+streams_disable_filtering = set(
+    [
+        "contractor_timesheets",
+        "employee_timesheets",
+        "jobs",
+        "vendor_orders",
+        "vendor_order_receipts",
+    ]
+)
 
 json_encoded_columns = {
     "jobs": ["RequestNo", "Name", "Description", "Notes"],
