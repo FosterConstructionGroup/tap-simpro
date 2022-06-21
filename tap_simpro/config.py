@@ -39,6 +39,11 @@ streams_specify_columns = set(
         "contacts",
         "employees",
         "invoices",
+        "job_cost_center_catalog_item",
+        "job_cost_center_labor_item",
+        "job_cost_center_one_off_item",
+        "job_cost_center_prebuild_item",
+        "job_cost_center_service_fee",
         "schedules",
         "sites",
         "vendor_order_credit_items",
@@ -57,6 +62,11 @@ streams_add_specified_columns = {
 }
 # Typically part of the URL but not present in the response
 streams_exclude_specified_columns = {
+    "job_cost_center_catalog_item": set(["job_id", "section_id", "cost_center_id"]),
+    "job_cost_center_labor_item": set(["job_id", "section_id", "cost_center_id"]),
+    "job_cost_center_one_off_item": set(["job_id", "section_id", "cost_center_id"]),
+    "job_cost_center_prebuild_item": set(["job_id", "section_id", "cost_center_id"]),
+    "job_cost_center_service_fee": set(["job_id", "section_id", "cost_center_id"]),
     "vendor_order_credits": set(["VendorOrderID", "VendorOrderReceiptID"]),
     "vendor_order_credit_items": set(
         ["ID", "VendorOrderID", "VendorOrderReceiptID", "VendorOrderCreditID"]
