@@ -71,6 +71,9 @@ streams_exclude_specified_columns = {
     "vendor_order_credit_items": set(
         ["ID", "VendorOrderID", "VendorOrderReceiptID", "VendorOrderCreditID"]
     ),
+    "vendor_order_item_allocations": set(
+        ["ID", "VendorOrderID", "CostCenterID", "Quantity", "Total"]
+    ),
 }
 # substreams can be updated more recently than the parent jobs, so date filtering can miss updated rows
 streams_disable_filtering = set(

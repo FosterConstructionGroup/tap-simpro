@@ -299,8 +299,18 @@ async def handle_timesheets(
 
 
 async def handle_vendor_order_item_allocations(
-    session, vendor_orders, schemas, state, mdata
+    session, all_vendor_orders, schemas, state, mdata
 ):
+    parent_resource = "vendor_orders"
+    parent_bookmark = get_bookmark(state, parent_resource, "since")
+    # all_vendor_orders includes all POs (whether they've changed or not) as PO receipts and credits date modified aren't linked to the PO so would be easy to not sync these and have subtly wrong data
+    # PO items don't have their own date modified so assuming it's the same as the parent, so can filter down the POs array to make less API calls
+    vendor_orders = [
+        v
+        for v in all_vendor_orders
+        if (not parent_bookmark or v["DateModified"] >= parent_bookmark)
+    ]
+
     resource = "vendor_order_item_allocations"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
@@ -326,7 +336,7 @@ async def handle_vendor_order_item_allocations(
 
         return rows
 
-    base_rows = await await_futures([handler(v) for v in vendor_orders])
+    base_rows = await await_futures(map(handler, vendor_orders))
     flattened = [
         a
         for vendor_order in base_rows
