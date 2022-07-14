@@ -60,7 +60,8 @@
       "additionalProperties": false,
       "properties": {
         "Quantity Surveyor": { "type": ["null", "string"] },
-        "Site Manager": { "type": ["null", "string"] }
+        "Site Manager": { "type": ["null", "string"] },
+        "Division": { "type": ["null", "string"] }
       }
     }
   }
