@@ -48,7 +48,8 @@ streams_specify_columns = set(
         "sites",
         "vendor_order_credit_items",
         "vendor_order_credits",
-        "vendor_order_item_allocations",
+        # commented out until Simpro fixes their bug that makes ?columns throw for this endpoint
+        # "vendor_order_item_allocations",
         "vendor_order_receipts",
         "vendor_orders",
         "vendors",
