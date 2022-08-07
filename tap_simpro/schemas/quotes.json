@@ -31,13 +31,6 @@
         "ID": { "type": ["number"] }
       }
     },
-    "ConvertedFromLead": {
-      "type": ["null", "object"],
-      "additionalProperties": false,
-      "properties": {
-        "ID": { "type": ["number"] }
-      }
-    },
     "Description": { "type": ["string"] },
     "Name": { "type": ["string"] },
     "Notes": { "type": ["string"] },
