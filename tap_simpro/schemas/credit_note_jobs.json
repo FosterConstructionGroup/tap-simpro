@@ -1,0 +1,17 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "CreditNoteID": { "type": ["string"] },
+    "JobID": { "type": ["string"] },
+    "ID": { "type": ["string"] },
+    "Total": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ExTax": { "type": ["null", "number"] },
+        "IncTax": { "type": ["null", "number"] }
+      }
+    }
+  }
+}

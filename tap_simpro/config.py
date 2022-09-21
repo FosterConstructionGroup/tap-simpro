@@ -1,5 +1,6 @@
 streams = {
     "contractors": ["contractor_timesheets"],
+    "credit_notes": ["credit_note_jobs"],
     "customers": ["customer_sites"],
     "employees": ["employee_timesheets"],
     "invoices": ["invoice_jobs"],
@@ -27,7 +28,7 @@ streams = {
     ],
 }
 
-streams_with_details = {"payable_invoices": False}
+streams_with_details = {"payable_invoices": False, "credit_notes": False}
 
 # handler doesn't fetch details for these either
 # note that this doesn't work well with array sub-streams as they aren't in the parent schema so don't get returned in the response. Don't want to add them to the parent schema either
