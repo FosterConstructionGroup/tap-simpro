@@ -28,6 +28,15 @@
       "properties": {
         "Foster Staff UID": { "type": ["null", "string"] }
       }
+    },
+    "PayRates": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "PayRate": { "type": ["number"] },
+        "EmploymentCost": { "type": ["number"] },
+        "Overhead": { "type": ["number"] }
+      }
     }
   }
 }
