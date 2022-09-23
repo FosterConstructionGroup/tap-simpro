@@ -6,6 +6,7 @@ from tap_simpro.utility import (
 )
 from tap_simpro.config import streams, json_encoded_columns, resource_details_url_fns
 from tap_simpro.handlers import handlers
+from tap_simpro.transforms import transforms
 from tap_simpro.utility import write_many
 
 
@@ -25,6 +26,9 @@ async def handle_resource(session, resource, schemas, state, mdata):
             session, resource, bookmark, schema, resource_details_url_fns.get(resource)
         )
     ]
+    # only for top-level resources as sub-streams already have handler functions
+    if resource in transforms:
+        transforms[resource](rows)
 
     for substream in streams.get(resource, []):
         if substream in schemas and handlers.get(substream) is not None:

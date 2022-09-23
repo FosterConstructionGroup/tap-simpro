@@ -64,6 +64,7 @@ streams_add_specified_columns = {
 }
 # Typically part of the URL but not present in the response
 streams_exclude_specified_columns = {
+    "catalogs": set(["Supplier", "InvoiceNumber"]),
     "job_cost_center_catalog_item": set(["job_id", "section_id", "cost_center_id"]),
     "job_cost_center_labor_item": set(["job_id", "section_id", "cost_center_id"]),
     "job_cost_center_one_off_item": set(["job_id", "section_id", "cost_center_id"]),
