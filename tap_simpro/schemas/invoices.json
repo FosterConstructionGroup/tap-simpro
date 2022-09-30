@@ -18,6 +18,23 @@
         "ID": { "type": ["number"] }
       }
     },
+    "DateIssued": { "type": ["null", "string"], "format": "date" },
+    "DatePaid": { "type": ["null", "string"], "format": "date" },
+    "Period": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "StartDate": { "type": ["null", "string"], "format": "date" },
+        "EndDate": { "type": ["null", "string"], "format": "date" }
+      }
+    },
+    "PaymentTerms": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "DueDate": { "type": ["null", "string"], "format": "date" }
+      }
+    },
     "Total": {
       "type": ["null", "object"],
       "additionalProperties": false,

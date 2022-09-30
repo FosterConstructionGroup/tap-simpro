@@ -38,6 +38,7 @@ streams_specify_columns = set(
         "activities",
         "catalogs",
         "contacts",
+        "credit_notes",
         "employees",
         "invoices",
         "job_cost_center_catalog_item",
