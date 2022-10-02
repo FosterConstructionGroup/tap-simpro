@@ -58,6 +58,7 @@ streams_specify_columns = set(
     ]
 )
 streams_add_specified_columns = {
+    "credit_notes": ",Jobs",
     "invoices": ",Jobs",
     "schedules": ",Blocks",
     "vendor_order_item_allocations": ",Allocations",
