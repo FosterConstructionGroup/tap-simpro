@@ -46,6 +46,7 @@ streams_specify_columns = set(
         "job_cost_center_one_off_item",
         "job_cost_center_prebuild_item",
         "job_cost_center_service_fee",
+        "recurring_invoices",
         "schedules",
         "sites",
         "vendor_order_credit_items",

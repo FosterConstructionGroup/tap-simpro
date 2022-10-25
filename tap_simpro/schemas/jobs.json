@@ -11,6 +11,13 @@
         "ID": { "type": ["number"] }
       }
     },
+    "CustomerContract": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
     "Site": {
       "type": ["null", "object"],
       "additionalProperties": false,
