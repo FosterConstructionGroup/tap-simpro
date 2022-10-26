@@ -10,7 +10,12 @@ from tap_simpro.utility import (
     await_futures,
     hash,
     get_resource,
+    transform_record,
 )
+
+# recurring invoices can be removed in the UI and not returned when listing in the API, but can query them individually and old invoices still refer to them
+recurring_invoice_ids_synced = set()
+recurring_invoice_ids_seen = set()
 
 
 async def handle_contractor_timesheets(session, contractors, schemas, state, mdata):
@@ -290,6 +295,23 @@ async def handle_quote_sections_cost_centers(session, rows, schemas, state, mdat
                     write_record(c, c_resource, c_schema, mdata, extraction_time)
 
     return new_bookmarks
+
+
+async def handle_removed_recurring_invoices(session, schema, mdata):
+    resource = "recurring_invoices"
+    extraction_time = datetime.now(timezone.utc).astimezone()
+    ids_to_fetch = [
+        id
+        for id in recurring_invoice_ids_seen
+        if id not in recurring_invoice_ids_synced
+    ]
+    rows = [
+        await get_basic(session, resource, f"recurringInvoices/{id}")
+        for id in ids_to_fetch
+    ]
+    rows = [transform_record(row, schema["properties"], []) for row in rows]
+
+    write_many(rows, resource, schema, mdata, extraction_time)
 
 
 async def handle_schedules_blocks(session, rows, schemas, state, mdata):

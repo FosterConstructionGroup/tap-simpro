@@ -25,6 +25,14 @@
         "ExTax": { "type": ["null", "number"] },
         "IncTax": { "type": ["null", "number"] }
       }
+    },
+    "Removed": { "type": ["null", "boolean"] },
+    "CustomFields": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Job Number": { "type": ["null", "number"] }
+      }
     }
   }
 }
