@@ -14,7 +14,6 @@ from tap_simpro.utility import (
     set_base_url,
 )
 from tap_simpro.fetch import handle_resource
-from tap_simpro.handlers import handle_removed_recurring_invoices
 
 logger = singer.get_logger()
 
@@ -133,20 +132,6 @@ async def do_sync(session, state, catalog):
     bookmarks_dicts = await await_futures(stream_futures)
     state = {k: format_date(v) for dict in bookmarks_dicts for k, v in dict.items()}
     singer.write_state(state)
-
-    # needs to be after `await await_futures`
-    if (
-        "recurring_invoices" in selected_stream_ids
-        and "invoices" in selected_stream_ids
-    ):
-        stream = next(
-            stream
-            for stream in catalog["streams"]
-            if stream["tap_stream_id"] == "recurring_invoices"
-        )
-        await handle_removed_recurring_invoices(
-            session, stream["schema"], stream["metadata"]
-        )
 
 
 async def run_async(config, state, catalog):

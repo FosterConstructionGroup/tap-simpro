@@ -69,7 +69,9 @@ async def get_resource(
             endpoint = (
                 endpoint_override if endpoint_override else get_endpoint(resource)
             )
-            url = f"{endpoint}/?pageSize={page_size}&page={page}&Archived={archived}&orderby=-DateModified{columns_query_string}"
+            # recurring invoices uses Removed instead of Archived
+            # API ignores fields that aren't present, so can safely send both archived and removed each time
+            url = f"{endpoint}/?pageSize={page_size}&page={page}&Archived={archived}&Removed={archived}&orderby=-DateModified{columns_query_string}"
 
             # print("URL", url)
             json = await get_basic(session, resource, url)
@@ -131,10 +133,10 @@ async def get_resource(
             if len(json) < page_size:
                 return
 
-    # no query string option to get archived and unarchived, so run it once with each
+    # no query string option to get archived and unarchived (or removed and not removed), so run it once with each
     await _get(False)
-    # only run a second time if the field can be archived, or it'll just ignore the query parameter and fetch all fields a second time
-    if "Archived" in schema_fields:
+    # only run a second time if records can be archived/removed, or it'll just ignore the query parameter and fetch all records a second time
+    if "Archived" in schema_fields or "Removed" in schema_fields:
         await _get(True)
 
     return ls
