@@ -1,6 +1,6 @@
 streams = {
     "contractors": ["contractor_timesheets"],
-    "credit_notes": ["credit_note_jobs"],
+    "credit_notes": ["credit_note_jobs", "credit_note_cost_centers"],
     "customers": ["customer_sites"],
     "employees": ["employee_timesheets"],
     "invoices": ["invoice_jobs", "invoice_cost_centers"],
@@ -59,7 +59,7 @@ streams_specify_columns = set(
     ]
 )
 streams_add_specified_columns = {
-    "credit_notes": ",Jobs",
+    "credit_notes": ",Jobs,CostCenters",
     "invoices": ",Jobs,CostCenters",
     "schedules": ",Blocks",
     "vendor_order_item_allocations": ",Allocations",

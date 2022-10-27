@@ -63,6 +63,29 @@ async def handle_credit_note_jobs(session, credit_notes, schemas, state, mdata):
     return {resource: extraction_time}
 
 
+async def handle_credit_note_cost_centers(session, credit_notes, schemas, state, mdata):
+    resource = "credit_note_cost_centers"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    ls = []
+
+    for cn in credit_notes:
+        credit_note_id = cn["ID"]
+        ccs = cn["CostCenters"]
+
+        for cc in ccs:
+            cc["CreditNoteID"] = credit_note_id
+            # rename row ID so it's clearer
+            cc["JobCostCenterID"] = cc["ID"]
+            cc["ID"] = str(cc["CreditNoteID"]) + "_" + str(cc["JobCostCenterID"])
+
+        ls += ccs
+
+    write_many(ls, resource, schema, mdata, extraction_time)
+    return {resource: extraction_time}
+
+
 async def handle_customer_sites(session, rows, schemas, state, mdata):
     resource = "customer_sites"
     schema = schemas[resource]
@@ -547,6 +570,7 @@ async def handle_job_work_order_blocks(session, rows, schemas, state, mdata):
 handlers = {
     "contractor_timesheets": handle_contractor_timesheets,
     "credit_note_jobs": handle_credit_note_jobs,
+    "credit_note_cost_centers": handle_credit_note_cost_centers,
     "customer_sites": handle_customer_sites,
     "employee_timesheets": handle_employee_timesheets,
     "invoice_jobs": handle_invoice_jobs,
