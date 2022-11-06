@@ -1,0 +1,93 @@
+{
+  "type": ["null", "object"],
+  "additionalProperties": false,
+  "properties": {
+    "ID": { "type": ["string"] },
+    "Subject": { "type": ["null", "string"] },
+    "CompletedBy": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "ID": { "type": ["number"] }
+      }
+    },
+    "Associated": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Job": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] },
+            "CostCenter": {
+              "type": ["null", "object"],
+              "additionalProperties": false,
+              "properties": {
+                "ID": { "type": ["number"] }
+              }
+            }
+          }
+        },
+        "Quote": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] }
+          }
+        },
+        "Custtomer": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] }
+          }
+        },
+        "Contact": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] }
+          }
+        },
+        "Site": {
+          "type": ["null", "object"],
+          "additionalProperties": false,
+          "properties": {
+            "ID": { "type": ["number"] }
+          }
+        }
+      }
+    },
+    "StartDate": { "type": ["null", "string"], "format": "date" },
+    "DueDate": { "type": ["null", "string"], "format": "date" },
+    "CompletedDate": { "type": ["null", "string"], "format": "date" },
+    "Description": { "type": ["string"] },
+    "Notes": { "type": ["string"] },
+    "Status": { "type": ["string"] },
+    "Priority": { "type": ["string"] },
+    "Estimated": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Hours": { "type": ["number"] },
+        "Minutes": { "type": ["number"] },
+        "Seconds": { "type": ["number"] }
+      }
+    },
+    "Actual": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Hours": { "type": ["number"] },
+        "Minutes": { "type": ["number"] },
+        "Seconds": { "type": ["number"] }
+      }
+    },
+    "PercentComplete": { "type": ["string"] },
+    "DateModified": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    }
+  }
+}

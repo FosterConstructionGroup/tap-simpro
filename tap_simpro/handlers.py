@@ -10,7 +10,6 @@ from tap_simpro.utility import (
     await_futures,
     hash,
     get_resource,
-    transform_record,
 )
 
 
@@ -333,6 +332,21 @@ async def handle_schedules_blocks(session, rows, schemas, state, mdata):
     return {resource: extraction_time}
 
 
+async def handle_task_assignees(session, rows, schemas, state, mdata):
+    resource = "task_assignees"
+    schema = schemas[resource]
+    extraction_time = datetime.now(timezone.utc).astimezone()
+
+    for row in rows:
+        for a in row.get("Assignees", []):
+            a["AssigneeID"] = a["ID"]
+            a["TaskID"] = row["ID"]
+            a["ID"] = f'{a["TaskID"]}_{a["AssigneeID"]}'
+            write_record(a, resource, schema, mdata, extraction_time)
+
+    return {resource: extraction_time}
+
+
 async def handle_timesheets(
     session, resource, id, url, schema, state, mdata, extraction_time
 ):
@@ -562,6 +576,7 @@ handlers = {
     "schedules_blocks": handle_schedules_blocks,
     "quote_sections": handle_quote_sections_cost_centers,
     # quote_cost_centers is a sub-stream to quote_sections so can't be called directly
+    "task_assignees": handle_task_assignees,
     "vendor_order_item_allocations": handle_vendor_order_item_allocations,
     "vendor_order_receipts": handle_vendor_order_receipts,
     # vendor_order_receipt_items, vendor_order_credits, vendor_order_credit_items are sub-streams to vendor_order_receipts so can't be called directly

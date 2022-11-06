@@ -17,8 +17,9 @@ streams = {
     "job_work_orders": ["job_work_order_blocks"],
     # disabled for now as the pagination is buggy
     # "payable_invoices": ["payable_invoices_cost_centers"],
-    "schedules": ["schedules_blocks"],
     "quotes": ["quote_sections", "quote_cost_centers"],
+    "schedules": ["schedules_blocks"],
+    "tasks": ["task_assignees"],
     "vendor_orders": [
         "vendor_order_item_allocations",
         "vendor_order_receipts",
@@ -95,6 +96,7 @@ streams_disable_filtering = set(
 json_encoded_columns = {
     "jobs": ["RequestNo", "Name", "Description", "Notes"],
     "quotes": ["RequestNo", "Name", "Description", "Notes"],
+    "tasks": ["Description", "Notes"],
 }
 
 resource_details_url_fns = {
