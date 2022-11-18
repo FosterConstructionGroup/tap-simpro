@@ -1,16 +1,14 @@
 import re
 
 
-def transform_catalogs(rows):
+def transform_catalogs(row):
     regex = r"^(.+?)(?: non? catalog item)? - Invoice (.+?)$"
+    matches = re.findall(regex, row["Name"])
 
-    for row in rows:
-        matches = re.findall(regex, row["Name"])
-
-        if matches:
-            [(supplier, invoice_number)] = matches
-            row["Supplier"] = supplier
-            row["InvoiceNumber"] = invoice_number
+    if matches:
+        [(supplier, invoice_number)] = matches
+        row["Supplier"] = supplier
+        row["InvoiceNumber"] = invoice_number
 
 
 transforms = {

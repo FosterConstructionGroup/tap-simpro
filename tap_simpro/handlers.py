@@ -13,179 +13,121 @@ from tap_simpro.utility import (
 )
 
 
-async def handle_contractor_timesheets(session, contractors, schemas, state, mdata):
+async def handle_contractor_timesheets(session, contractor, schemas, state, mdata):
     resource = "contractor_timesheets"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    futures = []
+    id = contractor["ID"]
+    url = f"contractors/{id}/timesheets/?Includes=Job,Activity"
 
-    for c in contractors:
-        id = c["ID"]
-        url = f"contractors/{id}/timesheets/?Includes=Job,Activity"
-
-        futures.append(
-            handle_timesheets(
-                session, resource, id, url, schema, state, mdata, extraction_time
-            )
-        )
-
-    await await_futures(futures)
-
-    return {resource: extraction_time}
+    await handle_timesheets(
+        session, resource, id, url, schema, state, mdata, extraction_time
+    )
 
 
-async def handle_credit_note_jobs(session, credit_notes, schemas, state, mdata):
+async def handle_credit_note_jobs(session, credit_note, schemas, state, mdata):
     resource = "credit_note_jobs"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    ls = []
+    for j in credit_note["Jobs"]:
+        j["CreditNoteID"] = credit_note["ID"]
+        # rename row ID to JobID so it's clearer
+        j["JobID"] = j["ID"]
+        j["ID"] = str(j["CreditNoteID"]) + "_" + str(j["JobID"])
 
-    for cn in credit_notes:
-        cn_id = cn["ID"]
-        jobs = cn["Jobs"]
-
-        for j in jobs:
-            j["CreditNoteID"] = cn_id
-            # rename row ID to JobID so it's clearer
-            j["JobID"] = j["ID"]
-            j["ID"] = str(j["CreditNoteID"]) + "_" + str(j["JobID"])
-
-        ls += jobs
-
-    write_many(ls, resource, schema, mdata, extraction_time)
-    return {resource: extraction_time}
+        write_record(j, resource, schema, mdata, extraction_time)
 
 
-async def handle_credit_note_cost_centers(session, credit_notes, schemas, state, mdata):
+async def handle_credit_note_cost_centers(session, credit_note, schemas, state, mdata):
     resource = "credit_note_cost_centers"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    ls = []
+    for cc in credit_note["CostCenters"]:
+        cc["CreditNoteID"] = credit_note["ID"]
+        # rename row ID so it's clearer
+        cc["JobCostCenterID"] = cc["ID"]
+        cc["ID"] = str(cc["CreditNoteID"]) + "_" + str(cc["JobCostCenterID"])
 
-    for cn in credit_notes:
-        credit_note_id = cn["ID"]
-        ccs = cn["CostCenters"]
-
-        for cc in ccs:
-            cc["CreditNoteID"] = credit_note_id
-            # rename row ID so it's clearer
-            cc["JobCostCenterID"] = cc["ID"]
-            cc["ID"] = str(cc["CreditNoteID"]) + "_" + str(cc["JobCostCenterID"])
-
-        ls += ccs
-
-    write_many(ls, resource, schema, mdata, extraction_time)
-    return {resource: extraction_time}
+        write_record(cc, resource, schema, mdata, extraction_time)
 
 
-async def handle_customer_sites(session, rows, schemas, state, mdata):
+async def handle_customer_sites(session, row, schemas, state, mdata):
     resource = "customer_sites"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    for row in rows:
-        for site in row["Sites"]:
-            record = {
-                "ID": row["ID"] + site["ID"],
-                "CustomerID": row["ID"],
-                "SiteID": site["ID"],
-            }
-            write_record(record, resource, schema, mdata, extraction_time)
-
-    return {resource: extraction_time}
+    for site in row["Sites"]:
+        record = {
+            "ID": row["ID"] + site["ID"],
+            "CustomerID": row["ID"],
+            "SiteID": site["ID"],
+        }
+        write_record(record, resource, schema, mdata, extraction_time)
 
 
-async def handle_employee_timesheets(session, employees, schemas, state, mdata):
+async def handle_employee_timesheets(session, employee, schemas, state, mdata):
     resource = "employee_timesheets"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    futures = []
+    id = employee["ID"]
+    url = f"employees/{id}/timesheets/?Includes=Job,Activity"
 
-    for e in employees:
-        id = e["ID"]
-        url = f"employees/{id}/timesheets/?Includes=Job,Activity"
-
-        futures.append(
-            handle_timesheets(
-                session, resource, id, url, schema, state, mdata, extraction_time
-            )
-        )
-
-    await await_futures(futures)
-
-    return {resource: extraction_time}
+    await handle_timesheets(
+        session, resource, id, url, schema, state, mdata, extraction_time
+    )
 
 
-async def handle_invoice_jobs(session, invoices, schemas, state, mdata):
+async def handle_invoice_jobs(session, invoice, schemas, state, mdata):
     resource = "invoice_jobs"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    ls = []
+    for j in invoice["Jobs"]:
+        j["InvoiceID"] = invoice["ID"]
+        # rename row ID to JobID so it's clearer
+        j["JobID"] = j["ID"]
+        j["ID"] = str(j["InvoiceID"]) + "_" + str(j["JobID"])
 
-    for invoice in invoices:
-        invoice_id = invoice["ID"]
-        jobs = invoice["Jobs"]
-
-        for j in jobs:
-            j["InvoiceID"] = invoice_id
-            # rename row ID to JobID so it's clearer
-            j["JobID"] = j["ID"]
-            j["ID"] = str(j["InvoiceID"]) + "_" + str(j["JobID"])
-
-        ls += jobs
-
-    write_many(ls, resource, schema, mdata, extraction_time)
-    return {resource: extraction_time}
+        write_record(j, resource, schema, mdata, extraction_time)
 
 
-async def handle_invoice_cost_centers(session, invoices, schemas, state, mdata):
+async def handle_invoice_cost_centers(session, invoice, schemas, state, mdata):
     resource = "invoice_cost_centers"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    ls = []
+    for cc in invoice["CostCenters"]:
+        cc["InvoiceID"] = invoice["ID"]
+        # rename row ID so it's clearer
+        cc["JobCostCenterID"] = cc["ID"]
+        cc["ID"] = str(cc["InvoiceID"]) + "_" + str(cc["JobCostCenterID"])
 
-    for invoice in invoices:
-        invoice_id = invoice["ID"]
-        ccs = invoice["CostCenters"]
-
-        for cc in ccs:
-            cc["InvoiceID"] = invoice_id
-            # rename row ID so it's clearer
-            cc["JobCostCenterID"] = cc["ID"]
-            cc["ID"] = str(cc["InvoiceID"]) + "_" + str(cc["JobCostCenterID"])
-
-        ls += ccs
-
-    write_many(ls, resource, schema, mdata, extraction_time)
-    return {resource: extraction_time}
+        write_record(cc, resource, schema, mdata, extraction_time)
 
 
-async def handle_job_tags(session, jobs, schemas, state, mdata):
+async def handle_job_tags(session, job, schemas, state, mdata):
     resource = "job_tags"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    for job in jobs:
-        for tag in job.get("Tags", []):
-            tag["JobID"] = job["ID"]
-            tag["TagID"] = tag["ID"]
-            tag["ID"] = str(tag["JobID"]) + "_" + str(tag["TagID"])
+    for tag in job.get("Tags", []):
+        tag["JobID"] = job["ID"]
+        tag["TagID"] = tag["ID"]
+        tag["ID"] = str(tag["JobID"]) + "_" + str(tag["TagID"])
 
-            write_record(tag, resource, schema, mdata, extraction_time)
-    return {resource: extraction_time}
+        write_record(tag, resource, schema, mdata, extraction_time)
 
 
-async def handle_job_sections_cost_centers(session, rows, schemas, state, mdata):
+async def handle_job_sections_cost_centers(session, job, schemas, state, mdata):
     s_resource = "job_sections"
     s_schema = schemas[s_resource]
     c_resource = "job_cost_centers"
     c_schema = schemas.get(c_resource)
+    extraction_time = datetime.now(timezone.utc).astimezone()
 
     items_handlers = {
         "job_cost_center_catalog_item": "catalogs",
@@ -195,49 +137,40 @@ async def handle_job_sections_cost_centers(session, rows, schemas, state, mdata)
         "job_cost_center_service_fee": "serviceFees",
     }
 
-    extraction_time = datetime.now(timezone.utc).astimezone()
-
-    new_bookmarks = {s_resource: extraction_time}
-
     # far better parallelism getting everything at once than using `await` at the cost center granularity
     items_futures = []
 
-    for job in rows:
-        for s in job["Sections"]:
-            s["JobID"] = job["ID"]
-            write_record(s, s_resource, s_schema, mdata, extraction_time)
+    for s in job["Sections"]:
+        s["JobID"] = job["ID"]
+        write_record(s, s_resource, s_schema, mdata, extraction_time)
 
-            if c_resource in schemas:
-                new_bookmarks[c_resource] = extraction_time
-                for c in s["CostCenters"]:
-                    c["JobID"] = job["ID"]
-                    c["SectionID"] = s["ID"]
-                    write_record(c, c_resource, c_schema, mdata, extraction_time)
+        if c_resource in schemas:
+            for c in s["CostCenters"]:
+                c["JobID"] = job["ID"]
+                c["SectionID"] = s["ID"]
+                write_record(c, c_resource, c_schema, mdata, extraction_time)
 
-                    for (stream, suffix) in items_handlers.items():
-                        if stream in schemas:
-                            path_vars = {
-                                "job_id": job["ID"],
-                                "section_id": s["ID"],
-                                "cost_center_id": c["ID"],
-                            }
-                            items_futures.append(
-                                handle_job_cost_center_item(
-                                    stream,
-                                    session,
-                                    path_vars,
-                                    suffix,
-                                    schemas[stream],
-                                    get_bookmark(state, stream, "since"),
-                                    mdata,
-                                    extraction_time,
-                                )
+                for (stream, suffix) in items_handlers.items():
+                    if stream in schemas:
+                        path_vars = {
+                            "job_id": job["ID"],
+                            "section_id": s["ID"],
+                            "cost_center_id": c["ID"],
+                        }
+                        items_futures.append(
+                            handle_job_cost_center_item(
+                                stream,
+                                session,
+                                path_vars,
+                                suffix,
+                                schemas[stream],
+                                get_bookmark(state, stream, "since"),
+                                mdata,
+                                extraction_time,
                             )
-                            new_bookmarks[stream] = extraction_time
+                        )
 
     await await_futures(items_futures)
-
-    return new_bookmarks
 
 
 async def handle_job_cost_center_item(
@@ -252,11 +185,10 @@ async def handle_job_cost_center_item(
 ):
     endpoint = f'jobs/{path_vars["job_id"]}/sections/{path_vars["section_id"]}/costCenters/{path_vars["cost_center_id"]}/{endpoint_suffix}'
     try:
-        base_rows = await get_resource(
+        async for row in get_resource(
             session, resource, bookmark, schema, endpoint_override=endpoint
-        )
-        rows = [{**row, **path_vars} for row in base_rows]
-        write_many(rows, resource, schema, mdata, extraction_time)
+        ):
+            write_record({**row, **path_vars}, resource, schema, mdata, extraction_time)
     # service fees can throw a 404 instead of just returning [], so handle that case
     except ClientResponseError as e:
         if e.status == 404:
@@ -265,32 +197,27 @@ async def handle_job_cost_center_item(
             raise e
 
 
-async def handle_payable_invoices_cost_centers(
-    session, invoices, schemas, state, mdata
-):
+async def handle_payable_invoices_cost_centers(session, invoice, schemas, state, mdata):
     resource = "payable_invoices_cost_centers"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    for invoice in invoices:
-        for cc in invoice["CostCenters"]:
-            cc["ID"] = hash(
-                "_".join(
-                    [
-                        invoice["OrderID"],
-                        invoice["JobNo"],
-                        invoice["AccountNo"],
-                        invoice["Name"],
-                    ]
-                )
+    for cc in invoice["CostCenters"]:
+        cc["ID"] = hash(
+            "_".join(
+                [
+                    invoice["OrderID"],
+                    invoice["JobNo"],
+                    invoice["AccountNo"],
+                    invoice["Name"],
+                ]
             )
-            cc["OrderID"] = invoice["OrderID"]
-            write_record(cc, resource, schema, mdata, extraction_time)
+        )
+        cc["OrderID"] = invoice["OrderID"]
+        write_record(cc, resource, schema, mdata, extraction_time)
 
-    return {resource: extraction_time}
 
-
-async def handle_quote_sections_cost_centers(session, rows, schemas, state, mdata):
+async def handle_quote_sections_cost_centers(session, quote, schemas, state, mdata):
     s_resource = "quote_sections"
     s_schema = schemas[s_resource]
     c_resource = "quote_cost_centers"
@@ -300,51 +227,42 @@ async def handle_quote_sections_cost_centers(session, rows, schemas, state, mdat
 
     new_bookmarks = {s_resource: extraction_time}
 
-    for quote in rows:
-        for s in quote["Sections"]:
-            s["QuoteID"] = quote["ID"]
-            write_record(s, s_resource, s_schema, mdata, extraction_time)
+    for s in quote["Sections"]:
+        s["QuoteID"] = quote["ID"]
+        write_record(s, s_resource, s_schema, mdata, extraction_time)
 
-            if c_resource in schemas:
-                new_bookmarks[c_resource] = extraction_time
-                for c in s["CostCenters"]:
-                    c["QuoteID"] = quote["ID"]
-                    c["SectionID"] = s["ID"]
-                    write_record(c, c_resource, c_schema, mdata, extraction_time)
-
-    return new_bookmarks
+        if c_resource in schemas:
+            new_bookmarks[c_resource] = extraction_time
+            for c in s["CostCenters"]:
+                c["QuoteID"] = quote["ID"]
+                c["SectionID"] = s["ID"]
+                write_record(c, c_resource, c_schema, mdata, extraction_time)
 
 
-async def handle_schedules_blocks(session, rows, schemas, state, mdata):
+async def handle_schedules_blocks(session, row, schemas, state, mdata):
     resource = "schedules_blocks"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    for row in rows:
-        i = 0
-        for block in row["Blocks"]:
-            i += 1
-            id = row["ID"]
-            block["ID"] = f"{id}_{i}"
-            block["ScheduleID"] = id
-            write_record(block, resource, schema, mdata, extraction_time)
-
-    return {resource: extraction_time}
+    i = 0
+    for block in row["Blocks"]:
+        i += 1
+        id = row["ID"]
+        block["ID"] = f"{id}_{i}"
+        block["ScheduleID"] = id
+        write_record(block, resource, schema, mdata, extraction_time)
 
 
-async def handle_task_assignees(session, rows, schemas, state, mdata):
+async def handle_task_assignees(session, row, schemas, state, mdata):
     resource = "task_assignees"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    for row in rows:
-        for a in row.get("Assignees", []):
-            a["AssigneeID"] = a["ID"]
-            a["TaskID"] = row["ID"]
-            a["ID"] = f'{a["TaskID"]}_{a["AssigneeID"]}'
-            write_record(a, resource, schema, mdata, extraction_time)
-
-    return {resource: extraction_time}
+    for a in row.get("Assignees", []):
+        a["AssigneeID"] = a["ID"]
+        a["TaskID"] = row["ID"]
+        a["ID"] = f'{a["TaskID"]}_{a["AssigneeID"]}'
+        write_record(a, resource, schema, mdata, extraction_time)
 
 
 async def handle_timesheets(
@@ -383,17 +301,15 @@ async def handle_timesheets(
 
 
 async def handle_vendor_order_item_allocations(
-    session, all_vendor_orders, schemas, state, mdata
+    session, vendor_order, schemas, state, mdata
 ):
     parent_resource = "vendor_orders"
     parent_bookmark = get_bookmark(state, parent_resource, "since")
-    # all_vendor_orders includes all POs (whether they've changed or not) as PO receipts and credits date modified aren't linked to the PO so would be easy to not sync these and have subtly wrong data
-    # PO items don't have their own date modified so assuming it's the same as the parent, so can filter down the POs array to make less API calls
-    vendor_orders = [
-        v
-        for v in all_vendor_orders
-        if (not parent_bookmark or v["DateModified"] >= parent_bookmark)
-    ]
+
+    # vendor_orders stream includes all POs (whether they've changed or not) as PO receipts and credits date modified aren't linked to the PO so would be easy to not sync these and have subtly wrong data
+    # PO items don't have their own date modified so assuming it's the same as the parent, so can return early to make less API calls
+    if parent_bookmark and vendor_order["DateModified"] <= parent_bookmark:
+        return
 
     resource = "vendor_order_item_allocations"
     schema = schemas[resource]
@@ -402,16 +318,14 @@ async def handle_vendor_order_item_allocations(
     async def handler(v):
         endpoint = f'vendorOrders/{v["ID"]}/catalogs'
 
-        rows = await get_resource(
+        async for r in get_resource(
             session,
             resource,
             None,
             schema,
             endpoint_override=endpoint,
             get_details_url=lambda row: f"{endpoint}/{row['Catalog']['ID']}",
-        )
-
-        for r in rows:
+        ):
             for a in r["Allocations"]:
                 a["VendorOrderID"] = v["ID"]
                 a["CostCenterID"] = v.get("AssignedTo", {}).get("ID")
@@ -419,21 +333,13 @@ async def handle_vendor_order_item_allocations(
                 a["Price"] = r["Price"]
                 a["ID"] = f'{v["ID"]}_{r["Catalog"]["ID"]}'
 
-        return rows
+            yield r
 
-    base_rows = await await_futures(map(handler, vendor_orders))
-    flattened = [
-        a
-        for vendor_order in base_rows
-        for row in vendor_order
-        for a in row["Allocations"]
-    ]
+    flattened = [a async for row in handler(vendor_order) for a in row["Allocations"]]
     write_many(flattened, resource, schema, mdata, extraction_time)
 
-    return {resource: extraction_time}
 
-
-async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, mdata):
+async def handle_vendor_order_receipts(session, vendor_order, schemas, state, mdata):
     r_resource = "vendor_order_receipts"
     r_schema = schemas[r_resource]
     i_resource = "vendor_order_receipt_items"
@@ -441,30 +347,19 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
 
     bookmark = get_bookmark(state, r_resource, "since")
     extraction_time = datetime.now(timezone.utc).astimezone()
-    new_bookmarks = {r_resource: extraction_time}
 
-    receipt_responses = await await_futures(
-        [
-            get_resource(
-                session,
-                r_resource,
-                bookmark,
-                r_schema,
-                endpoint_override=f'vendorOrders/{v["ID"]}/receipts',
-            )
-            for v in vendor_orders
-        ]
-    )
-
-    receipts = [r for res in receipt_responses for r in res]
-
-    for r in receipts:
+    async for r in get_resource(
+        session,
+        r_resource,
+        bookmark,
+        r_schema,
+        endpoint_override=f'vendorOrders/{vendor_order["ID"]}/receipts',
+    ):
         # helpful for credits
         r["VendorOrderID"] = r["VendorOrderNo"]
         write_record(r, r_resource, r_schema, mdata, extraction_time)
 
         if i_resource in schemas:
-            new_bookmarks[i_resource] = extraction_time
             for c in r["Catalogs"]:
                 # reset index with each new catalog item; only want to increment through the array
                 i = 0
@@ -476,17 +371,12 @@ async def handle_vendor_order_receipts(session, vendor_orders, schemas, state, m
                     item["ID"] = f'{r["ID"]}_{c["Catalog"]["ID"]}_{i}'
                     write_record(item, i_resource, i_schema, mdata, extraction_time)
 
-    credits_bookmarks = {}
-    if "vendor_order_credits" in schemas:
-        credits_bookmarks = await handle_vendor_order_credits(
-            session, receipts, schemas, state, mdata
-        )
-
-    return {**new_bookmarks, **credits_bookmarks}
+        if "vendor_order_credits" in schemas:
+            await handle_vendor_order_credits(session, r, schemas, state, mdata)
 
 
 async def handle_vendor_order_credits(
-    session, vendor_order_receipts, schemas, state, mdata
+    session, vendor_order_receipt, schemas, state, mdata
 ):
     c_resource = "vendor_order_credits"
     c_schema = schemas[c_resource]
@@ -495,69 +385,55 @@ async def handle_vendor_order_credits(
 
     bookmark = get_bookmark(state, c_resource, "since")
     extraction_time = datetime.now(timezone.utc).astimezone()
-    new_bookmarks = {c_resource: extraction_time}
 
     # separate function is the cleanest way to add the two parent reference fields
     async def get_credits(r):
-        res = await get_resource(
+        async for c in get_resource(
             session,
             c_resource,
             bookmark,
             c_schema,
             endpoint_override=f'vendorOrders/{r["VendorOrderID"]}/receipts/{r["ID"]}/credits',
-        )
-        for c in res:
+        ):
             c["VendorOrderID"] = r["VendorOrderID"]
             c["VendorOrderReceiptID"] = r["ID"]
-        return res
+            yield c
 
     async def get_items(c):
         endpoint = f'vendorOrders/{c["VendorOrderID"]}/receipts/{c["VendorOrderReceiptID"]}/credits/{c["ID"]}/catalogs'
-        res = await get_resource(
+        async for i in get_resource(
             session,
             i_resource,
             None,
             i_schema,
             endpoint_override=endpoint,
-        )
-        for i in res:
+        ):
             i["VendorOrderID"] = c["VendorOrderID"]
             i["VendorOrderReceiptID"] = c["VendorOrderReceiptID"]
             i["VendorOrderCreditID"] = c["ID"]
             i["ID"] = f'{i["VendorOrderCreditID"]}_{i["Catalog"]["ID"]}'
-        return res
+            yield i
 
-    credit_responses = await await_futures(
-        [get_credits(r) for r in vendor_order_receipts]
-    )
+    async for credit in get_credits(vendor_order_receipt):
+        write_record(credit, c_resource, c_schema, mdata, extraction_time)
 
-    credits = [c for res in credit_responses for c in res]
-    write_many(credits, c_resource, c_schema, mdata, extraction_time)
-
-    if i_resource in schemas:
-        new_bookmarks[i_resource] = extraction_time
-        items_responses = await await_futures([get_items(c) for c in credits])
-        items = [i for res in items_responses for i in res]
-        write_many(items, i_resource, i_schema, mdata, extraction_time)
-
-    return new_bookmarks
+        if i_resource in schemas:
+            async for item in get_items(credit):
+                write_record(item, i_resource, i_schema, mdata, extraction_time)
 
 
-async def handle_job_work_order_blocks(session, rows, schemas, state, mdata):
+async def handle_job_work_order_blocks(session, row, schemas, state, mdata):
     resource = "job_work_order_blocks"
     schema = schemas[resource]
     extraction_time = datetime.now(timezone.utc).astimezone()
 
-    for jwo in rows:
-        i = 0
-        for block in jwo["Blocks"]:
-            i += 1
-            id = jwo["ID"]
-            block["ID"] = f"{id}_{i}"
-            block["JobWorkOrderID"] = id
-            write_record(block, resource, schema, mdata, extraction_time)
-
-    return {resource: extraction_time}
+    i = 0
+    for block in row["Blocks"]:
+        i += 1
+        id = row["ID"]
+        block["ID"] = f"{id}_{i}"
+        block["JobWorkOrderID"] = id
+        write_record(block, resource, schema, mdata, extraction_time)
 
 
 handlers = {

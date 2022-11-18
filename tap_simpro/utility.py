@@ -47,7 +47,6 @@ def get_endpoint(resource):
 async def get_resource(
     session, resource, bookmark, schema, get_details_url=None, endpoint_override=None
 ):
-    ls = []
     page_size = 250
     schema_fields = schema["properties"].keys()
     disable_filtering = resource in streams_disable_filtering
@@ -62,8 +61,6 @@ async def get_resource(
     # print(columns_query_string)
 
     async def _get(archived):
-        nonlocal ls
-
         page = 1
         while True:
             endpoint = (
@@ -113,7 +110,7 @@ async def get_resource(
                     ):
                         return
 
-                    ls.append(d)
+                    yield d
             else:
                 # if the list returns DateModified too, then use that to return early
                 last_modified = json[-1].get("DateModified")
@@ -124,22 +121,27 @@ async def get_resource(
                     and last_modified < bookmark
                 ):
                     # only add rows updated since the bookmark
-                    ls += [r for r in json if r.get("DateModified") >= bookmark]
+                    for r in json:
+                        if r.get("DateModified") >= bookmark:
+                            yield r
+
                     return
                 else:
-                    ls += json
+                    for r in json:
+                        yield r
 
             # otherwise will always finish with a guaranteed-empty request that will return []
             if len(json) < page_size:
                 return
 
     # no query string option to get archived and unarchived (or removed and not removed), so run it once with each
-    await _get(False)
+    async for row in _get(False):
+        yield row
+
     # only run a second time if records can be archived/removed, or it'll just ignore the query parameter and fetch all records a second time
     if "Archived" in schema_fields or "Removed" in schema_fields:
-        await _get(True)
-
-    return ls
+        async for row in _get(True):
+            yield row
 
 
 async def get_basic(session, resource, url):
