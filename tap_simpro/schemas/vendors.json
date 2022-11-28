@@ -12,6 +12,13 @@
       "type": ["null", "string"],
       "format": "date-time"
     },
+    "Profile": {
+      "type": ["null", "object"],
+      "additionalProperties": false,
+      "properties": {
+        "Account": { "type": ["null", "string"] }
+      }
+    },
     "Archived": { "type": ["null", "boolean"] }
   }
 }
