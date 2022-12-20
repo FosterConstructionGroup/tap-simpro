@@ -69,7 +69,8 @@
         "Quantity Surveyor": { "type": ["null", "string"] },
         "Site Manager": { "type": ["null", "string"] },
         "Division": { "type": ["null", "string"] },
-        "Invoice Date": { "type": ["null", "string"], "format": "date" }
+        "Invoice Date": { "type": ["null", "string"], "format": "date" },
+        "Contract Type": { "type": ["null", "string"] }
       }
     }
   }
