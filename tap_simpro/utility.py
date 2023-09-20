@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import hashlib
 import asyncio
 import singer
@@ -24,8 +25,9 @@ strip_href_url = "/api/v1.0/companies/0/"
 
 sub_streams = set([x for v in streams.values() for x in v])
 
-# no rate limiting or concurrent request limit mentioned in docs https://developer.simprogroup.com/apidoc/
-sem = asyncio.Semaphore(32)
+# Maximum 10 requests per second per https://developer.simprogroup.com/apidoc/?page=ed8457e003ba0f6197756eca5a61fde9
+# Sometimes APIs include a limit on maximum concurrent requests too, so set this up front to be safe
+sem = asyncio.Semaphore(10)
 
 
 def set_base_url(base):
@@ -168,6 +170,36 @@ def transform_record(record, properties, json_encoded_columns):
 
 async def await_futures(futures):
     return await asyncio.gather(*futures)
+
+
+# Rate limit is 10 requests per second, per https://developer.simprogroup.com/apidoc/?page=ed8457e003ba0f6197756eca5a61fde9
+# Adapted from https://quentin.pradet.me/blog/how-do-you-rate-limit-calls-with-aiohttp.html
+class RateLimiter:
+    # slightly lower to give a safe buffer
+    rate = 8  # requests per second
+
+    def __init__(self, client):
+        self.client = client
+        self.tokens = self.rate
+        self.updated_at = time.monotonic()
+
+    async def get(self, *args, **kwargs):
+        await self.wait_for_token()
+        return self.client.get(*args, **kwargs)
+
+    async def wait_for_token(self):
+        while self.tokens < 1:
+            self.add_new_tokens()
+            await asyncio.sleep(0.1)
+        self.tokens -= 1
+
+    # would be nice to just make this an async loop but you can't do that easily in Python, unlike Node
+    def add_new_tokens(self):
+        now = time.monotonic()
+        time_since_update = now - self.updated_at
+        new_tokens = time_since_update * self.rate
+        self.tokens += new_tokens
+        self.updated_at = now
 
 
 date_format = "%Y-%m-%d"

@@ -12,6 +12,7 @@ from tap_simpro.utility import (
     sub_streams,
     format_date,
     set_base_url,
+    RateLimiter,
 )
 from tap_simpro.fetch import handle_resource
 
@@ -139,6 +140,7 @@ async def run_async(config, state, catalog):
     headers = {"Authorization": f"Bearer {access_token}"}
 
     async with aiohttp.ClientSession(headers=headers) as session:
+        session = RateLimiter(session)
         await do_sync(session, state, catalog)
 
 
