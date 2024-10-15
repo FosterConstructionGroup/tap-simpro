@@ -5,7 +5,6 @@ import hashlib
 import asyncio
 import singer
 from singer import metadata
-import singer.metrics as metrics
 from datetime import datetime
 
 from tap_simpro.config import (
@@ -148,11 +147,9 @@ async def get_resource(
 
 async def get_basic(session, resource, url):
     async with sem:
-        with metrics.http_request_timer(resource) as timer:
-            async with await session.get(f"{base_url}/{url}") as resp:
-                timer.tags[metrics.Tag.http_status_code] = resp.status
-                resp.raise_for_status()
-                return await resp.json()
+        async with await session.get(f"{base_url}/{url}") as resp:
+            resp.raise_for_status()
+            return await resp.json()
 
 
 def transform_record(record, properties, json_encoded_columns):
@@ -236,10 +233,8 @@ def write_record(row, resource, schema, mdata, dt):
 
 
 def write_many(rows, resource, schema, mdata, dt):
-    with metrics.record_counter(resource) as counter:
-        for row in rows:
-            write_record(row, resource, schema, mdata, dt)
-            counter.increment()
+    for row in rows:
+        write_record(row, resource, schema, mdata, dt)
 
 
 # per https://stackoverflow.com/questions/19053707/converting-snake-case-to-lower-camel-case-lowercamelcase#19053800
