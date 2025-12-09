@@ -20,5 +20,5 @@ singer-python==5.9.0
 six==1.16.0
 tomli==1.2.3
 typing-extensions==4.0.1
-urllib3==1.24.3
+urllib3==1.26.0
 yarl==1.7.2
