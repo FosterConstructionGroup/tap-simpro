@@ -10,7 +10,7 @@ setup(
     url="http://singer.io",
     classifiers=["Programming Language :: Python :: 3 :: Only"],
     py_modules=["tap_simpro"],
-    install_requires=["pipelinewise-singer-python==1.*", "aiohttp==3.7.3"],
+    install_requires=["pipelinewise-singer-python==1.*", "aiohttp==3.13.3"],
     extras_require={
         "dev": [
             "pylint",
